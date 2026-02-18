@@ -69,14 +69,14 @@ const Facturas = () => {
 
       const estudios = (facturaCompleta.detalles || facturaCompleta.items || []).map(item => ({
         nombre: item.descripcion || item.nombre || 'Estudio',
-        precio: item.precio_unitario || item.precio || 0,
-        cobertura: 0
+        precio: item.precioUnitario || item.precio_unitario || item.precio || 0,
+        cobertura: item.descuento || item.cobertura || 0
       }));
 
       const facturaConPago = {
         ...facturaCompleta,
-        montoPagado: facturaCompleta.total_pagado || facturaCompleta.monto_pagado || 0,
-        numero: facturaCompleta.numero_factura || facturaCompleta.numero,
+        montoPagado: facturaCompleta.montoPagado || facturaCompleta.total_pagado || facturaCompleta.monto_pagado || 0,
+        numero: facturaCompleta.numero || facturaCompleta.numero_factura,
         autorizacion: facturaCompleta.ncf || '',
       };
       setFacturaImprimir({

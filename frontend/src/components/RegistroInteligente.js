@@ -290,7 +290,7 @@ const RegistroInteligente = () => {
 
       {/* PASO 1: PACIENTE */}
       {paso === 1 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 25 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 25 }}>
           {/* Buscar existente */}
           <div style={{ background: 'white', padding: 25, borderRadius: 15, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             <h3 style={{ marginTop: 0 }}><FaSearch /> Buscar Paciente Existente</h3>
@@ -332,7 +332,7 @@ const RegistroInteligente = () => {
           <div style={{ background: 'white', padding: 25, borderRadius: 15, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             <h3 style={{ marginTop: 0 }}><FaUserPlus /> Crear Nuevo Paciente</h3>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 'bold', color: '#555' }}>Nombre *</label>
                 <input type="text" placeholder="Nombre" value={nuevoPaciente.nombre}
@@ -347,7 +347,7 @@ const RegistroInteligente = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 'bold', color: '#555' }}>Cedula *</label>
                 <input type="text" placeholder="000-0000000-0" value={nuevoPaciente.cedula}
@@ -362,7 +362,7 @@ const RegistroInteligente = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 'bold', color: '#555' }}>Fecha Nacimiento *</label>
                 <input type="date" value={nuevoPaciente.fechaNacimiento}
@@ -380,7 +380,7 @@ const RegistroInteligente = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginTop: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 'bold', color: '#555' }}>Nacionalidad *</label>
                 <select value={nuevoPaciente.nacionalidad}
@@ -420,7 +420,7 @@ const RegistroInteligente = () => {
             <div style={{ marginTop: 20, padding: 15, background: '#e3f2fd', borderRadius: 10 }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#1976d2' }}>Datos del Seguro (opcional)</h4>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 'bold', color: '#555' }}>Seguro</label>
                   <select value={nuevoPaciente.seguroNombre}
@@ -459,7 +459,7 @@ const RegistroInteligente = () => {
 
       {/* PASO 2: ESTUDIOS */}
       {paso === 2 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 25 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 25 }}>
           <div style={{ background: 'white', padding: 25, borderRadius: 15, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
             <h3 style={{ marginTop: 0 }}>Estudios Disponibles</h3>
             

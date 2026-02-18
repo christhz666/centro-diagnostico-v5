@@ -115,11 +115,15 @@ class ApiService {
 
     async createCita(data) {
         const ordenData = {
-            paciente_id: data.paciente,
+            paciente: data.paciente,
+            fecha: data.fecha || new Date().toISOString().split('T')[0],
+            horaInicio: data.horaInicio || new Date().toTimeString().split(' ')[0].substring(0, 5),
             medico_referente: data.medico_referente || '',
-            prioridad: 'normal',
+            estado: data.estado || 'programada',
+            metodoPago: data.metodoPago || 'pendiente',
             estudios: (data.estudios || []).map(e => ({
-                estudio_id: e.estudio || e.id || e.estudio_id,
+                estudio: e.estudio || e.id || e.estudio_id || e._id,
+                precio: e.precio || 0,
                 descuento: e.descuento || 0
             }))
         };
