@@ -8,3 +8,8 @@ build/
 logs/
 nohup.out
 .DS_Store
+
+# Backend downloads directory - exclude installers but keep README
+backend/downloads/*.exe
+backend/downloads/*.dmg
+backend/downloads/*.AppImage
