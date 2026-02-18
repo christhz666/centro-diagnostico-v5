@@ -26,10 +26,13 @@ function App() {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 768) {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
         setSidebarOpen(false);
       }
     };
@@ -105,7 +108,7 @@ function App() {
     <Router>
       <div style={{ display: 'flex', minHeight: '100vh' }}>
         {/* Mobile overlay */}
-        {sidebarOpen && window.innerWidth <= 768 && (
+        {sidebarOpen && isMobile && (
           <div
             className="sidebar-overlay"
             onClick={() => setSidebarOpen(false)}
@@ -137,7 +140,7 @@ function App() {
               <Link
                 key={index}
                 to={item.path}
-                onClick={() => { if (window.innerWidth <= 768) setSidebarOpen(false); }}
+                onClick={() => { if (isMobile) setSidebarOpen(false); }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
