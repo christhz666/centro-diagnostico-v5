@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaLock } from 'react-icons/fa';
 import api from '../services/api';
 
@@ -7,6 +7,15 @@ const Login = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [empresaConfig, setEmpresaConfig] = useState({});
+
+    useEffect(() => {
+        // Load public company info for the login screen
+        fetch('/api/configuracion/empresa')
+            .then(res => res.json())
+            .then(data => setEmpresaConfig(data))
+            .catch(() => {});
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -57,8 +66,8 @@ const Login = ({ onLogin }) => {
                 }}>
                     <div style={{textAlign: 'center', marginBottom: '30px'}}>
                         <img 
-                            src="/logo-centro.png"
-                            alt="Mi Esperanza Lab" 
+                            src={empresaConfig.logo_login || "/logo-centro.png"}
+                            alt={empresaConfig.nombre || "Centro Diagnóstico"}
                             style={{
                                 maxWidth: '100%', 
                                 height: 'auto', 
@@ -67,9 +76,14 @@ const Login = ({ onLogin }) => {
                             }}
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = "https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png";
+                                e.target.src = "/logo-centro.png";
                             }}
                         />
+                        {empresaConfig.nombre && (
+                            <h2 style={{ color: 'white', margin: '10px 0 0', fontSize: '22px' }}>
+                                {empresaConfig.nombre}
+                            </h2>
+                        )}
                     </div>
                     <div style={{marginTop: '30px'}}>
                         <p style={{fontSize: '16px', lineHeight: '1.6', opacity: 0.9}}>

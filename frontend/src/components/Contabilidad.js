@@ -34,6 +34,7 @@ const Contabilidad = () => {
     const [filtroTipo, setFiltroTipo] = useState('');
     const [filtroCategoria, setFiltroCategoria] = useState('');
     const [busqueda, setBusqueda] = useState('');
+    const [facturasRecientes, setFacturasRecientes] = useState([]);
     const [formData, setFormData] = useState({
         tipo: 'ingreso',
         categoria: 'consultas',
@@ -58,13 +59,16 @@ const Contabilidad = () => {
             if (filtroCategoria) params.categoria = filtroCategoria;
             if (busqueda) params.search = busqueda;
 
-            const [resumenRes, movimientosRes] = await Promise.all([
+            const [resumenRes, movimientosRes, facturasRes] = await Promise.all([
                 api.getResumenContable(),
-                api.getMovimientosContables(params)
+                api.getMovimientosContables(params),
+                api.getFacturas({}).catch(() => [])
             ]);
 
             setResumen(resumenRes);
             setMovimientos(Array.isArray(movimientosRes) ? movimientosRes : []);
+            const facturas = Array.isArray(facturasRes) ? facturasRes : [];
+            setFacturasRecientes(facturas.slice(0, 10));
         } catch (err) {
             console.error('Error cargando contabilidad:', err);
             setError(err.message);
@@ -238,6 +242,58 @@ const Contabilidad = () => {
                                 <span style={{ marginLeft: 8 }}>{formatMoney(resumen.anio?.balance)}</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Facturación Reciente - Connected from billing */}
+            {facturasRecientes.length > 0 && (
+                <div style={styles.formContainer}>
+                    <h3 style={{ margin: '0 0 15px', color: '#1b262c' }}>
+                        <FaMoneyBillWave style={{ marginRight: 8, color: '#27ae60' }} />
+                        Facturación Reciente
+                    </h3>
+                    <div style={styles.tableContainer}>
+                        <table style={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th style={styles.th}>Factura</th>
+                                    <th style={styles.th}>Fecha</th>
+                                    <th style={styles.th}>Paciente</th>
+                                    <th style={styles.th}>Total</th>
+                                    <th style={styles.th}>Pagado</th>
+                                    <th style={styles.th}>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {facturasRecientes.map(f => (
+                                    <tr key={f._id || f.id} style={styles.tr}>
+                                        <td style={styles.td}>{f.numero || f.numero_factura}</td>
+                                        <td style={styles.td}>
+                                            {new Date(f.fecha_factura || f.createdAt).toLocaleDateString('es-DO')}
+                                        </td>
+                                        <td style={styles.td}>
+                                            {f.datosCliente?.nombre || f.paciente?.nombre || 'N/A'}
+                                        </td>
+                                        <td style={{ ...styles.td, fontWeight: 'bold' }}>
+                                            {formatMoney(f.total)}
+                                        </td>
+                                        <td style={{ ...styles.td, color: f.montoPagado >= f.total ? '#27ae60' : '#e74c3c' }}>
+                                            {formatMoney(f.montoPagado || 0)}
+                                        </td>
+                                        <td style={styles.td}>
+                                            <span style={{
+                                                ...styles.badge,
+                                                background: f.estado === 'pagada' ? '#d4edda' : f.estado === 'emitida' ? '#fff3cd' : '#f8d7da',
+                                                color: f.estado === 'pagada' ? '#155724' : f.estado === 'emitida' ? '#856404' : '#721c24'
+                                            }}>
+                                                {f.estado}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

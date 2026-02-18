@@ -9,6 +9,7 @@ const ConsultaRapida = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resultadoSeleccionado, setResultadoSeleccionado] = useState(null);
+  const [empresaConfig, setEmpresaConfig] = useState({});
   const inputRef = useRef(null);
 
   const colores = {
@@ -26,6 +27,16 @@ const ConsultaRapida = () => {
       }
     }, 2000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch('/api/configuracion/', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setEmpresaConfig(data.configuracion || data || {}))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -60,8 +71,25 @@ const ConsultaRapida = () => {
       setPaciente(pacienteEncontrado);
       
       try {
-        const resResponse = await api.getResultados({ pacienteId: pacienteEncontrado._id || pacienteEncontrado.id });
-        setResultados(resResponse.data || resResponse || []);
+        const pacienteId = pacienteEncontrado._id || pacienteEncontrado.id;
+        const resResponse = await api.getResultados({ paciente: pacienteId, limit: 5 });
+        const allResults = Array.isArray(resResponse) ? resResponse : (resResponse.data || resResponse || []);
+        // For barcode search, show only the most recent order's results
+        if (allResults.length > 0) {
+          const latestCita = allResults[0].cita;
+          if (latestCita) {
+            const latestResults = allResults.filter(r => {
+              const citaId = r.cita?._id || r.cita;
+              return citaId === latestCita._id || citaId === latestCita;
+            });
+            setResultados(latestResults);
+          } else {
+            // If no cita reference, show only the most recent result
+            setResultados(allResults.slice(0, 1));
+          }
+        } else {
+          setResultados([]);
+        }
       } catch (e) {
         setResultados([]);
       }
@@ -139,8 +167,8 @@ const ConsultaRapida = () => {
     htmlContent += '</style></head><body>';
     
     htmlContent += '<div class="header">';
-    htmlContent += '<img src="https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png" alt="Mi Esperanza Lab" />';
-    htmlContent += '<div style="font-size:10px;margin-top:5px;">C/ Camino de Cancino #24, Cancino Adentro, Santo Domingo Este, Rep. Dom.<br/>Tel: 849-288-9790 / 809-986-9970 | miesperanzalab@gmail.com</div>';
+    htmlContent += '<img src="' + (empresaConfig.logo_resultados || '/logo-centro.png') + '" alt="' + (empresaConfig.empresa_nombre || 'Centro Diagnóstico') + '" onerror="this.onerror=null;this.src=\'/logo-centro.png\';" />';
+    htmlContent += '<div style="font-size:10px;margin-top:5px;">' + (empresaConfig.empresa_direccion || '') + '<br/>Tel: ' + (empresaConfig.empresa_telefono || '') + (empresaConfig.empresa_email ? ' | ' + empresaConfig.empresa_email : '') + '</div>';
     htmlContent += '</div>';
     
     htmlContent += '<div class="section-title">INFORMACION DEL PACIENTE</div>';

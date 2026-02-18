@@ -5,7 +5,8 @@ import './App.css';
 import { 
   FaHeartbeat, FaChartPie, FaPlusCircle, FaFileInvoiceDollar, 
   FaUserMd, FaCogs, FaSignOutAlt, FaBars, FaTimes, FaUsers, 
-  FaFlask, FaClipboardList, FaBarcode
+  FaFlask, FaClipboardList, FaBarcode, FaChevronDown, FaChevronRight,
+  FaBalanceScale, FaPalette
 } from 'react-icons/fa';
 
 import Login from './components/Login';
@@ -27,6 +28,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [empresaNombre, setEmpresaNombre] = useState('');
 
   useEffect(() => {
     const handleResize = () => {
@@ -54,6 +57,13 @@ function App() {
       }
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/configuracion/empresa')
+      .then(res => res.json())
+      .then(data => { if (data.nombre) setEmpresaNombre(data.nombre); })
+      .catch(() => {});
   }, []);
 
   const handleLogin = (userData, userToken) => {
@@ -95,14 +105,19 @@ function App() {
     { path: '/facturas', icon: <FaFileInvoiceDollar />, label: 'Facturas', roles: ['admin', 'recepcion'] },
     { path: '/medico', icon: <FaUserMd />, label: 'Portal Médico', roles: ['admin', 'medico'] },
     { path: '/resultados', icon: <FaFlask />, label: 'Resultados', roles: ['admin', 'medico', 'laboratorio'] },
-    { path: '/admin', icon: <FaCogs />, label: 'Admin Panel', roles: ['admin'] },
+  ];
+
+  const adminSubItems = [
+    { path: '/admin', icon: <FaPalette />, label: 'Personalización', roles: ['admin'] },
     { path: '/admin/usuarios', icon: <FaUsers />, label: 'Usuarios', roles: ['admin'] },
     { path: '/admin/equipos', icon: <FaCogs />, label: 'Equipos', roles: ['admin'] },
     { path: '/admin/estudios', icon: <FaClipboardList />, label: 'Catálogo Estudios', roles: ['admin'] },
-    { path: '/contabilidad', icon: <FaChartPie />, label: 'Contabilidad', roles: ['admin'] },
+    { path: '/contabilidad', icon: <FaBalanceScale />, label: 'Contabilidad', roles: ['admin'] },
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user.rol));
+  const filteredAdminSub = adminSubItems.filter(item => item.roles.includes(user.rol));
+  const showAdminMenu = filteredAdminSub.length > 0;
 
   return (
     <Router>
@@ -132,7 +147,7 @@ function App() {
             gap: '10px'
           }}>
             <FaHeartbeat style={{ fontSize: 30, color: '#e74c3c' }} />
-            {sidebarOpen && <span style={{ color: 'white', fontWeight: 'bold' }}>Mi Esperanza</span>}
+            {sidebarOpen && <span style={{ color: 'white', fontWeight: 'bold' }}>{empresaNombre || 'Mi Esperanza'}</span>}
           </div>
 
           <nav style={{ padding: '10px 0' }}>
@@ -163,6 +178,72 @@ function App() {
                 {sidebarOpen && <span className="sidebar-label">{item.label}</span>}
               </Link>
             ))}
+
+            {/* Admin Panel Dropdown */}
+            {showAdminMenu && (
+              <>
+                <div
+                  onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 20px',
+                    color: 'rgba(255,255,255,0.8)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    borderTop: '1px solid rgba(255,255,255,0.1)',
+                    marginTop: '5px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}><FaCogs /></span>
+                  {sidebarOpen && (
+                    <>
+                      <span className="sidebar-label" style={{ flex: 1 }}>Admin Panel</span>
+                      <span style={{ fontSize: 12 }}>
+                        {adminMenuOpen ? <FaChevronDown /> : <FaChevronRight />}
+                      </span>
+                    </>
+                  )}
+                </div>
+                {adminMenuOpen && sidebarOpen && filteredAdminSub.map((item, index) => (
+                  <Link
+                    key={`admin-${index}`}
+                    to={item.path}
+                    onClick={() => { if (isMobile) setSidebarOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 20px 10px 40px',
+                      color: 'rgba(255,255,255,0.7)',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s',
+                      fontSize: '14px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                      e.currentTarget.style.color = 'white';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                    }}
+                  >
+                    <span style={{ fontSize: 15 }}>{item.icon}</span>
+                    <span className="sidebar-label">{item.label}</span>
+                  </Link>
+                ))}
+              </>
+            )}
           </nav>
 
           <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, padding: '0 20px' }}>

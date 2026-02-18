@@ -249,6 +249,17 @@ class ApiService {
     async deleteMovimientoContable(id) {
         return this.request('/contabilidad/' + id, { method: 'DELETE' });
     }
+
+    // Configuracion
+    async getConfiguracion() {
+        return this.request('/configuracion/');
+    }
+    async updateConfiguracion(data) {
+        return this.request('/configuracion/', { method: 'PUT', body: JSON.stringify(data) });
+    }
+    async getEmpresaInfo() {
+        return this.request('/configuracion/empresa');
+    }
 }
 
 const api = new ApiService();
