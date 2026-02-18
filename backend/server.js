@@ -137,6 +137,7 @@ app.use('/api/equipos', require('./routes/equipoRoutes'));
 app.use('/api/contabilidad', require('./routes/contabilidad'));
 app.use('/api/configuracion', require('./routes/configuracion'));
 app.use('/api/deploy', require('./routes/deploy'));
+app.use('/api/downloads', require('./routes/downloads')); // No requiere autenticación
 
 // ==========================================
 // SERVIR FRONTEND (React build)
