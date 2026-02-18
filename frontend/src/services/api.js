@@ -74,6 +74,7 @@ class ApiService {
     async getMe() { return this.request('/auth/me'); }
 
     // Dashboard endpoints: /api/dashboard/stats, /api/dashboard/citas-grafica, /api/dashboard/top-estudios
+    // Citas hoy endpoint: /api/citas/hoy
     async getDashboardStats() { return this.request('/dashboard/stats'); }
     async getCitasHoy() { return this.request('/citas/hoy'); }
     async getCitasGrafica() { return this.request('/dashboard/citas-grafica'); }
@@ -115,6 +116,7 @@ class ApiService {
         return this.request('/citas/?' + query);
     }
     async getCita(id) { return this.request('/citas/' + id); }
+    // @deprecated Legacy alias for backward compatibility - use getCita() instead
     async getOrden(id) { return this.request('/citas/' + id); }
 
     async createCita(data) {
