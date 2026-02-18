@@ -128,6 +128,11 @@ const ConsultaRapida = () => {
   };
 
   // IMPRESION A4 - UNA SOLA PAGINA
+  const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  };
+
   const imprimirResultado = (resultado) => {
     const ventana = window.open('', 'Resultado', 'width=800,height=1000');
     
@@ -135,11 +140,11 @@ const ConsultaRapida = () => {
       const estadoColor = v.estado === 'normal' ? '#d4edda' : v.estado === 'alto' ? '#f8d7da' : '#fff3cd';
       const estadoTexto = v.estado === 'normal' ? '#155724' : v.estado === 'alto' ? '#721c24' : '#856404';
       return '<tr>' +
-        '<td style="padding:10px;border:1px solid #87CEEB;">' + (v.parametro || v.nombre || '') + '</td>' +
-        '<td style="padding:10px;border:1px solid #87CEEB;text-align:center;font-weight:bold;color:#1a3a5c;">' + (v.valor || '') + ' ' + (v.unidad || '') + '</td>' +
-        '<td style="padding:10px;border:1px solid #87CEEB;text-align:center;font-size:12px;color:#666;">' + (v.valorReferencia || '-') + '</td>' +
+        '<td style="padding:10px;border:1px solid #87CEEB;">' + escapeHtml(v.parametro || v.nombre || '') + '</td>' +
+        '<td style="padding:10px;border:1px solid #87CEEB;text-align:center;font-weight:bold;color:#1a3a5c;">' + escapeHtml(v.valor || '') + ' ' + escapeHtml(v.unidad || '') + '</td>' +
+        '<td style="padding:10px;border:1px solid #87CEEB;text-align:center;font-size:12px;color:#666;">' + escapeHtml(v.valorReferencia || '-') + '</td>' +
         '<td style="padding:10px;border:1px solid #87CEEB;text-align:center;">' +
-          '<span style="padding:4px 12px;border-radius:12px;font-size:11px;background:' + estadoColor + ';color:' + estadoTexto + ';">' + (v.estado || 'N/A') + '</span>' +
+          '<span style="padding:4px 12px;border-radius:12px;font-size:11px;background:' + estadoColor + ';color:' + estadoTexto + ';">' + escapeHtml(v.estado || 'N/A') + '</span>' +
         '</td>' +
       '</tr>';
     }).join('');
@@ -167,22 +172,22 @@ const ConsultaRapida = () => {
     htmlContent += '</style></head><body>';
     
     htmlContent += '<div class="header">';
-    htmlContent += '<img src="' + (empresaConfig.logo_resultados || '/logo-centro.png') + '" alt="' + (empresaConfig.empresa_nombre || 'Centro Diagnóstico') + '" onerror="this.onerror=null;this.src=\'/logo-centro.png\';" />';
-    htmlContent += '<div style="font-size:10px;margin-top:5px;">' + (empresaConfig.empresa_direccion || '') + '<br/>Tel: ' + (empresaConfig.empresa_telefono || '') + (empresaConfig.empresa_email ? ' | ' + empresaConfig.empresa_email : '') + '</div>';
+    htmlContent += '<img src="' + escapeHtml(empresaConfig.logo_resultados || '/logo-centro.png') + '" alt="' + escapeHtml(empresaConfig.empresa_nombre || 'Centro Diagnóstico') + '" onerror="this.onerror=null;this.src=\'/logo-centro.png\';" />';
+    htmlContent += '<div style="font-size:10px;margin-top:5px;">' + escapeHtml(empresaConfig.empresa_direccion || '') + '<br/>Tel: ' + escapeHtml(empresaConfig.empresa_telefono || '') + (empresaConfig.empresa_email ? ' | ' + escapeHtml(empresaConfig.empresa_email) : '') + '</div>';
     htmlContent += '</div>';
     
     htmlContent += '<div class="section-title">INFORMACION DEL PACIENTE</div>';
     
     htmlContent += '<div class="info-grid">';
-    htmlContent += '<div><strong>Paciente:</strong> ' + (paciente?.nombre || '') + ' ' + (paciente?.apellido || '') + '</div>';
-    htmlContent += '<div><strong>Cedula:</strong> ' + (paciente?.cedula || 'N/A') + '</div>';
-    htmlContent += '<div><strong>Edad:</strong> ' + edadPaciente + ' años</div>';
+    htmlContent += '<div><strong>Paciente:</strong> ' + escapeHtml(paciente?.nombre || '') + ' ' + escapeHtml(paciente?.apellido || '') + '</div>';
+    htmlContent += '<div><strong>Cedula:</strong> ' + escapeHtml(paciente?.cedula || 'N/A') + '</div>';
+    htmlContent += '<div><strong>Edad:</strong> ' + escapeHtml(String(edadPaciente)) + ' años</div>';
     htmlContent += '<div><strong>Sexo:</strong> ' + (paciente?.sexo === 'M' ? 'Masculino' : 'Femenino') + '</div>';
-    htmlContent += '<div><strong>Nacionalidad:</strong> ' + (paciente?.nacionalidad || 'Dominicano') + '</div>';
-    htmlContent += '<div><strong>Fecha:</strong> ' + fechaResultado + '</div>';
+    htmlContent += '<div><strong>Nacionalidad:</strong> ' + escapeHtml(paciente?.nacionalidad || 'Dominicano') + '</div>';
+    htmlContent += '<div><strong>Fecha:</strong> ' + escapeHtml(fechaResultado) + '</div>';
     htmlContent += '</div>';
     
-    htmlContent += '<div class="section-title">RESULTADO: ' + nombreEstudio + '</div>';
+    htmlContent += '<div class="section-title">RESULTADO: ' + escapeHtml(nombreEstudio) + '</div>';
     
     htmlContent += '<table><thead><tr>';
     htmlContent += '<th style="width:35%;">Parametro</th>';
@@ -195,15 +200,15 @@ const ConsultaRapida = () => {
     
     if (resultado.interpretacion) {
       htmlContent += '<div style="background:#e6f3ff;border-left:4px solid #1a3a5c;padding:10px;border-radius:5px;margin:10px 0;">';
-      htmlContent += '<strong>INTERPRETACION:</strong><p style="margin:5px 0 0;">' + resultado.interpretacion + '</p></div>';
+      htmlContent += '<strong>INTERPRETACION:</strong><p style="margin:5px 0 0;">' + escapeHtml(resultado.interpretacion) + '</p></div>';
     }
     
     if (resultado.conclusion) {
       htmlContent += '<div style="background:#e8f5e9;border-left:4px solid #27ae60;padding:10px;border-radius:5px;margin:10px 0;">';
-      htmlContent += '<strong>CONCLUSION:</strong><p style="margin:5px 0 0;">' + resultado.conclusion + '</p></div>';
+      htmlContent += '<strong>CONCLUSION:</strong><p style="margin:5px 0 0;">' + escapeHtml(resultado.conclusion) + '</p></div>';
     }
     
-    htmlContent += '<div class="firma"><div class="firma-linea">Dr(a). ' + doctorNombre + '</div>';
+    htmlContent += '<div class="firma"><div class="firma-linea">Dr(a). ' + escapeHtml(doctorNombre) + '</div>';
     htmlContent += '<div style="font-size:10px;color:#666;margin-top:3px;">Firma y Sello</div></div>';
     
     htmlContent += '<div class="footer"><strong>Gracias por confiar en nosotros!</strong> | <span style="color:#87CEEB;">Su salud es nuestra prioridad</span></div>';
