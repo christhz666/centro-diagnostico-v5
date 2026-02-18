@@ -13,6 +13,10 @@ const PortalMedico = () => {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
 
+  // Constantes para formato de códigos
+  const CODIGO_MUESTRA_PREFIX = 'MUE-';
+  const CODIGO_MUESTRA_MIN_LENGTH = 13; // MUE-YYYYMMDD-NNNNN tiene 18, pero buscamos con 13+ para ser flexibles
+
   const colores = {
     azulCielo: '#87CEEB',
     azulOscuro: '#1a3a5c'
@@ -36,7 +40,7 @@ const PortalMedico = () => {
     }
 
     // Si la búsqueda parece un código de muestra (MUE-YYYYMMDD-NNNNN)
-    if (busqueda.startsWith('MUE-') && busqueda.length >= 13) {
+    if (busqueda.startsWith(CODIGO_MUESTRA_PREFIX) && busqueda.length >= CODIGO_MUESTRA_MIN_LENGTH) {
       try {
         setLoading(true);
         const response = await api.getResultadoPorCodigoMuestra(busqueda);

@@ -12,6 +12,12 @@ const ConsultaRapida = () => {
   const [empresaConfig, setEmpresaConfig] = useState({});
   const inputRef = useRef(null);
 
+  // Constantes para códigos
+  const CODIGO_PACIENTE_PREFIX = 'PAC';
+  const CODIGO_PACIENTE_MIN_LENGTH = 11;
+  const CODIGO_MUESTRA_PREFIX = 'MUE-';
+  const CODIGO_MUESTRA_MIN_LENGTH = 13; // Formato: MUE-YYYYMMDD-NNNNN
+
   const colores = {
     azulCielo: '#87CEEB',
     azulOscuro: '#1a3a5c',
@@ -40,7 +46,10 @@ const ConsultaRapida = () => {
   }, []);
 
   useEffect(() => {
-    if ((codigo.length >= 11 && codigo.startsWith('PAC')) || (codigo.length >= 13 && codigo.startsWith('MUE-'))) {
+    const tieneFormatoPaciente = codigo.length >= CODIGO_PACIENTE_MIN_LENGTH && codigo.startsWith(CODIGO_PACIENTE_PREFIX);
+    const tieneFormatoMuestra = codigo.length >= CODIGO_MUESTRA_MIN_LENGTH && codigo.startsWith(CODIGO_MUESTRA_PREFIX);
+    
+    if (tieneFormatoPaciente || tieneFormatoMuestra) {
       buscarPaciente();
     }
   }, [codigo]);
@@ -54,7 +63,7 @@ const ConsultaRapida = () => {
       setResultados([]);
 
       // Si es un código de muestra (MUE-YYYYMMDD-NNNNN), buscar el resultado
-      if (codigo.startsWith('MUE-') && codigo.length >= 13) {
+      if (codigo.startsWith(CODIGO_MUESTRA_PREFIX) && codigo.length >= CODIGO_MUESTRA_MIN_LENGTH) {
         try {
           const response = await api.getResultadoPorCodigoMuestra(codigo);
           const resultado = response.data || response;
@@ -74,7 +83,7 @@ const ConsultaRapida = () => {
         }
       }
 
-      const idParcial = codigo.replace('PAC', '').toLowerCase();
+      const idParcial = codigo.replace(CODIGO_PACIENTE_PREFIX, '').toLowerCase();
       const response = await api.getPacientes({ search: '' });
       const pacientes = response.data || response || [];
       
