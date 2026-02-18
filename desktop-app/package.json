@@ -1,0 +1,69 @@
+{
+  "name": "centro-diagnostico-desktop",
+  "version": "5.0.0",
+  "description": "Centro Diagnóstico v5 - Aplicación de Escritorio",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "pack": "electron-builder --dir"
+  },
+  "keywords": [
+    "centro-diagnostico",
+    "laboratorio",
+    "medical",
+    "electron"
+  ],
+  "author": "Centro Diagnóstico",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^23.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {},
+  "build": {
+    "appId": "com.centrodiagnostico.desktop",
+    "productName": "Centro Diagnóstico",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Centro Diagnóstico",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png",
+      "category": "Medical"
+    }
+  }
+}
