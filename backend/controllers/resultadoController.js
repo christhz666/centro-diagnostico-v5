@@ -1,6 +1,10 @@
 const Resultado = require('../models/Resultado');
 const Cita = require('../models/Cita');
 const Paciente = require('../models/Paciente');
+const Factura = require('../models/Factura');
+
+// Estados de pago constantes
+const ESTADOS_PAGO_PENDIENTE = ['borrador', 'emitida'];
 
 // @desc    Obtener resultados (con filtros)
 // @route   GET /api/resultados
@@ -262,8 +266,6 @@ exports.marcarImpreso = async (req, res, next) => {
 // @route   GET /api/resultados/:id/verificar-pago
 exports.verificarPago = async (req, res, next) => {
     try {
-        const Factura = require('../models/Factura');
-        
         // Obtener el resultado con la cita y paciente poblados
         const resultado = await Resultado.findById(req.params.id)
             .populate('cita')
@@ -281,7 +283,7 @@ exports.verificarPago = async (req, res, next) => {
             paciente: resultado.paciente._id,
             $or: [
                 { pagado: false },
-                { estado: { $in: ['borrador', 'emitida'] } }
+                { estado: { $in: ESTADOS_PAGO_PENDIENTE } }
             ]
         }).select('numero total montoPagado estado');
 

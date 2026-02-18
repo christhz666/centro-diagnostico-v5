@@ -56,8 +56,8 @@ const VisorResultados = () => {
       setEstadoPago(response.data);
     } catch (error) {
       console.error('Error al verificar pago:', error);
-      // Si hay error en la verificación, permitir imprimir (fail-safe)
-      setEstadoPago({ puede_imprimir: true, monto_pendiente: 0 });
+      // Por seguridad, no permitir imprimir si hay error en la verificación
+      setEstadoPago({ puede_imprimir: false, monto_pendiente: 0, error: true });
     }
   };
 
@@ -362,7 +362,7 @@ const VisorResultados = () => {
               <p style={{ fontSize: '16px', marginBottom: '15px', textAlign: 'center' }}>
                 ⚠️ Este paciente tiene un pago pendiente de{' '}
                 <strong style={{ color: '#e74c3c', fontSize: '20px' }}>
-                  RD$ {estadoPago.monto_pendiente.toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  RD$ {(estadoPago.monto_pendiente || 0).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </strong>
               </p>
               <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>
