@@ -1,0 +1,64 @@
+{
+  "server_url": "http://192.9.135.84:5000/api",
+  "station_name": "PC-LABORATORIO",
+  "api_key": "",
+  "collectors": {
+    "serial": {
+      "enabled": true,
+      "ports": [
+        {
+          "port": "COM3",
+          "baud_rate": 9600,
+          "data_bits": 8,
+          "stop_bits": 1,
+          "parity": "N",
+          "equipment_type": "hematologia",
+          "equipment_name": "Sysmex XN-1000"
+        },
+        {
+          "port": "COM4",
+          "baud_rate": 9600,
+          "data_bits": 8,
+          "stop_bits": 1,
+          "parity": "N",
+          "equipment_type": "quimica",
+          "equipment_name": "Roche Cobas c311"
+        }
+      ]
+    },
+    "file_watcher": {
+      "enabled": true,
+      "watch_dirs": [
+        {
+          "path": "C:/EquiposExport/hematologia",
+          "file_type": "hl7",
+          "equipment_type": "hematologia",
+          "equipment_name": "Sysmex XN-1000"
+        },
+        {
+          "path": "C:/EquiposExport/quimica",
+          "file_type": "hl7",
+          "equipment_type": "quimica",
+          "equipment_name": "Roche Cobas c311"
+        },
+        {
+          "path": "C:/EquiposExport/dicom",
+          "file_type": "dicom",
+          "equipment_type": "sonografia",
+          "equipment_name": "GE Voluson"
+        }
+      ]
+    },
+    "dicom_listener": {
+      "enabled": false,
+      "ae_title": "CENTRO_DIAG",
+      "port": 11112,
+      "store_path": "C:/EquiposExport/dicom_received"
+    }
+  },
+  "upload_interval_seconds": 10,
+  "retry_on_failure": true,
+  "max_retries": 3,
+  "log_level": "INFO",
+  "log_file": "agent.log"
+}
