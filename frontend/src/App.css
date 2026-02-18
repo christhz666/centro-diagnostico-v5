@@ -1,0 +1,80 @@
+/* Reset y estilos globales */
+* {
+  box-sizing: border-box;
+}
+
+/* Quitar el cursor de texto en elementos no editables */
+body, div, span, p, h1, h2, h3, h4, h5, h6, 
+button, a, label, table, tr, td, th, 
+nav, aside, header, footer, main, section {
+  cursor: default;
+}
+
+/* Solo mostrar cursor de texto en inputs y textareas */
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+}
+
+/* Cursor pointer para elementos clickeables */
+button, a, [role="button"], .clickable {
+  cursor: pointer;
+}
+
+/* Cursor para selects */
+select {
+  cursor: pointer;
+}
+
+/* Animación de spin para loading */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Animación pulse */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Estilos para scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Quitar outline azul en focus pero mantener accesibilidad */
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Deshabilitar selección de texto en elementos de UI */
+button, nav, aside, .no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Permitir selección en contenido */
+p, span, td, th, input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
