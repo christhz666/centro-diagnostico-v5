@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+// Schema para contador global de IDs
+const contadorSchema = new mongoose.Schema({
+    _id: { type: String, required: true },
+    seq: { type: Number, default: 0 }
+});
+
+const Contador = mongoose.model('Contador', contadorSchema);
+
 const resultadoSchema = new mongoose.Schema({
     // Código único para identificación de muestra
     codigoMuestra: {
@@ -97,38 +105,68 @@ const resultadoSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Auto-generar código de muestra ANTES de validar
-// Usando un patrón más robusto para evitar race conditions
+// Helper function para determinar si es estudio de laboratorio
+function esEstudioLaboratorio(estudio) {
+    if (!estudio) return false;
+    
+    // Si el código empieza con LAB
+    if (estudio.codigo && estudio.codigo.toUpperCase().startsWith('LAB')) {
+        return true;
+    }
+    
+    // Categorías de laboratorio
+    const categoriasLab = [
+        'hematologia',
+        'quimica',
+        'orina',
+        'coagulacion',
+        'inmunologia',
+        'microbiologia',
+        'laboratorio clinico'
+    ];
+    
+    if (estudio.categoria) {
+        const catLower = estudio.categoria.toLowerCase();
+        return categoriasLab.some(c => catLower.includes(c));
+    }
+    
+    return false;
+}
+
+// Auto-generar código de muestra simple con secuencia global
+// Laboratorio: L0001, L0002, etc.
+// Otras áreas: 0001, 0002, etc.
 resultadoSchema.pre('validate', async function(next) {
     if (!this.codigoMuestra) {
         try {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const datePrefix = `${year}${month}${day}`;
-            
-            // Buscar el último código del día para obtener el siguiente número
-            const ultimoResultado = await mongoose.model('Resultado')
-                .findOne({ codigoMuestra: new RegExp(`^MUE-${datePrefix}-`) })
-                .sort({ codigoMuestra: -1 })
-                .select('codigoMuestra')
-                .lean();
-            
-            let nextNumber = 1;
-            if (ultimoResultado && ultimoResultado.codigoMuestra) {
-                // Extraer el número del último código
-                const match = ultimoResultado.codigoMuestra.match(/-(\d{5})$/);
-                if (match) {
-                    nextNumber = parseInt(match[1], 10) + 1;
-                }
+            // Poblar el estudio si no está poblado
+            if (!this.populated('estudio') && this.estudio) {
+                await this.populate('estudio');
             }
             
-            this.codigoMuestra = `MUE-${datePrefix}-${String(nextNumber).padStart(5, '0')}`;
+            // Obtener el siguiente número de la secuencia global
+            const contador = await Contador.findByIdAndUpdate(
+                'resultado_id',
+                { $inc: { seq: 1 } },
+                { new: true, upsert: true }
+            );
+            
+            const numeroSecuencia = contador.seq;
+            
+            // Determinar si es laboratorio
+            const esLab = esEstudioLaboratorio(this.estudio);
+            
+            // Generar código simple
+            if (esLab) {
+                this.codigoMuestra = `L${numeroSecuencia}`;
+            } else {
+                this.codigoMuestra = `${numeroSecuencia}`;
+            }
+            
         } catch (error) {
             // En caso de error, usar timestamp para garantizar unicidad
             const timestamp = Date.now();
-            this.codigoMuestra = `MUE-${timestamp}`;
+            this.codigoMuestra = `ERR-${timestamp}`;
         }
     }
     next();
@@ -140,4 +178,7 @@ resultadoSchema.index({ cita: 1 });
 resultadoSchema.index({ estado: 1 });
 resultadoSchema.index({ codigoMuestra: 1 });
 
-module.exports = mongoose.model('Resultado', resultadoSchema);
+const Resultado = mongoose.model('Resultado', resultadoSchema);
+
+module.exports = Resultado;
+module.exports.Contador = Contador;

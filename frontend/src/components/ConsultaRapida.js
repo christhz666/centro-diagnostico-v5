@@ -15,6 +15,9 @@ const ConsultaRapida = () => {
   // Constantes para códigos
   const CODIGO_PACIENTE_PREFIX = 'PAC';
   const CODIGO_PACIENTE_MIN_LENGTH = 11;
+  // Nuevo formato simple: L1328 (lab) o 1329 (otras áreas)
+  const CODIGO_MUESTRA_SIMPLE_MIN_LENGTH = 1; // Al menos 1 dígito
+  // Formato antiguo para retrocompatibilidad
   const CODIGO_MUESTRA_PREFIX = 'MUE-';
   const CODIGO_MUESTRA_MIN_LENGTH = 13; // Formato: MUE-YYYYMMDD-NNNNN
 
@@ -48,8 +51,10 @@ const ConsultaRapida = () => {
   useEffect(() => {
     const tieneFormatoPaciente = codigo.length >= CODIGO_PACIENTE_MIN_LENGTH && codigo.startsWith(CODIGO_PACIENTE_PREFIX);
     const tieneFormatoMuestra = codigo.length >= CODIGO_MUESTRA_MIN_LENGTH && codigo.startsWith(CODIGO_MUESTRA_PREFIX);
+    // Nuevo formato simple: L1328 o solo número 1329
+    const esFormatoSimple = /^L?\d+$/.test(codigo) && codigo.length >= 1;
     
-    if (tieneFormatoPaciente || tieneFormatoMuestra) {
+    if (tieneFormatoPaciente || tieneFormatoMuestra || esFormatoSimple) {
       buscarPaciente();
     }
   }, [codigo]);
@@ -62,8 +67,11 @@ const ConsultaRapida = () => {
       setPaciente(null);
       setResultados([]);
 
-      // Si es un código de muestra (MUE-YYYYMMDD-NNNNN), buscar el resultado
-      if (codigo.startsWith(CODIGO_MUESTRA_PREFIX) && codigo.length >= CODIGO_MUESTRA_MIN_LENGTH) {
+      // Nuevo formato simple: L1328 o 1329
+      const esFormatoSimple = /^L?\d+$/.test(codigo);
+      
+      // Si es un código de muestra simple o antiguo, buscar el resultado
+      if (esFormatoSimple || (codigo.startsWith(CODIGO_MUESTRA_PREFIX) && codigo.length >= CODIGO_MUESTRA_MIN_LENGTH)) {
         try {
           const response = await api.getResultadoPorCodigoMuestra(codigo);
           const resultado = response.data || response;

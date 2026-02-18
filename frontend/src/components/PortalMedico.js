@@ -14,6 +14,9 @@ const PortalMedico = () => {
   const [guardando, setGuardando] = useState(false);
 
   // Constantes para formato de códigos
+  // Nuevo formato simple: L1328 (lab) o 1329 (otras áreas)
+  const CODIGO_MUESTRA_SIMPLE_MIN_LENGTH = 1;
+  // Formato antiguo para retrocompatibilidad
   const CODIGO_MUESTRA_PREFIX = 'MUE-';
   const CODIGO_MUESTRA_MIN_LENGTH = 13; // MUE-YYYYMMDD-NNNNN tiene 18, pero buscamos con 13+ para ser flexibles
 
@@ -39,8 +42,9 @@ const PortalMedico = () => {
       return;
     }
 
-    // Si la búsqueda parece un código de muestra (MUE-YYYYMMDD-NNNNN)
-    if (busqueda.startsWith(CODIGO_MUESTRA_PREFIX) && busqueda.length >= CODIGO_MUESTRA_MIN_LENGTH) {
+    // Si la búsqueda parece un código de muestra simple (L1328 o 1329) o formato antiguo (MUE-YYYYMMDD-NNNNN)
+    const esFormatoSimple = /^L?\d+$/.test(busqueda);
+    if (esFormatoSimple || (busqueda.startsWith(CODIGO_MUESTRA_PREFIX) && busqueda.length >= CODIGO_MUESTRA_MIN_LENGTH)) {
       try {
         setLoading(true);
         const response = await api.getResultadoPorCodigoMuestra(busqueda);
