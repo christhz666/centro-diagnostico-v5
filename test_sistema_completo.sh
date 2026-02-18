@@ -3,6 +3,33 @@
 ################################################################################
 # TEST SISTEMA COMPLETO - CENTRO DIAGNÓSTICO MI ESPERANZA
 # Script de verificación exhaustiva de toda la aplicación
+#
+# Descripción:
+#   Este script realiza 114+ verificaciones exhaustivas del sistema completo:
+#   - Estructura de archivos (backend Node.js, Python/Flask, frontend React)
+#   - Dependencias (node_modules, Python venv)
+#   - Consistencia de imports y controllers
+#   - Conexiones a bases de datos (MongoDB, PostgreSQL)
+#   - Endpoints de API REST
+#   - Mapeo de rutas frontend ↔ backend
+#   - Variables de entorno
+#
+# Uso:
+#   ./test_sistema_completo.sh
+#
+# Salida:
+#   - Terminal: Output con colores (verde=pass, amarillo=warn, rojo=fail)
+#   - Log: logs/test_sistema_YYYYMMDD_HHMMSS.log
+#
+# Características:
+#   - Idempotente (se puede ejecutar múltiples veces)
+#   - No requiere servidor corriendo para tests básicos
+#   - Tests de API completos si servidor está en puerto 5000
+#   - Logs automáticamente excluidos de git
+#
+# Autor: Sistema de Diagnóstico Centro Médico
+# Versión: 1.0
+# Fecha: 2026-02-18
 ################################################################################
 
 # Colores para terminal
