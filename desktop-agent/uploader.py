@@ -200,7 +200,7 @@ class ResultUploader:
         Returns:
             True si se envió exitosamente, False en caso contrario
         """
-        endpoint = f"{self.server_url}/maquinas/recibir-json"
+        endpoint = f"{self.server_url}/equipos/recibir-json"
         
         headers = {
             'Content-Type': 'application/json'
