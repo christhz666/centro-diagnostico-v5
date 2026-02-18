@@ -257,3 +257,63 @@ exports.marcarImpreso = async (req, res, next) => {
         next(error);
     }
 };
+
+// @desc    Verificar estado de pago antes de imprimir
+// @route   GET /api/resultados/:id/verificar-pago
+exports.verificarPago = async (req, res, next) => {
+    try {
+        const Factura = require('../models/Factura');
+        
+        // Obtener el resultado con la cita y paciente poblados
+        const resultado = await Resultado.findById(req.params.id)
+            .populate('cita')
+            .populate('paciente', 'nombre apellido');
+
+        if (!resultado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Resultado no encontrado'
+            });
+        }
+
+        // Buscar facturas asociadas al paciente que estén pendientes de pago
+        const facturasPendientes = await Factura.find({
+            paciente: resultado.paciente._id,
+            $or: [
+                { pagado: false },
+                { estado: { $in: ['borrador', 'emitida'] } }
+            ]
+        }).select('numero total montoPagado estado');
+
+        // Calcular el total pendiente
+        let montoPendiente = 0;
+        facturasPendientes.forEach(factura => {
+            const pendiente = factura.total - (factura.montoPagado || 0);
+            if (pendiente > 0) {
+                montoPendiente += pendiente;
+            }
+        });
+
+        const puedeImprimir = montoPendiente === 0;
+
+        res.json({
+            success: true,
+            puede_imprimir: puedeImprimir,
+            monto_pendiente: montoPendiente,
+            facturas_pendientes: facturasPendientes.map(f => ({
+                id: f._id,
+                numero: f.numero,
+                total: f.total,
+                pagado: f.montoPagado || 0,
+                pendiente: f.total - (f.montoPagado || 0),
+                estado: f.estado
+            })),
+            paciente: {
+                nombre: resultado.paciente.nombre,
+                apellido: resultado.paciente.apellido
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaSearch, FaEye, FaFileAlt, FaFlask, FaTimes, FaUser, FaCalendar, FaIdCard } from 'react-icons/fa';
+import { FaSearch, FaEye, FaFileAlt, FaFlask, FaTimes, FaUser, FaCalendar, FaIdCard, FaPrint, FaExclamationTriangle } from 'react-icons/fa';
 
 const VisorResultados = () => {
   const [resultados, setResultados] = useState([]);
@@ -8,6 +8,8 @@ const VisorResultados = () => {
   const [error, setError] = useState(null);
   const [busqueda, setBusqueda] = useState('');
   const [detalleResultado, setDetalleResultado] = useState(null);
+  const [estadoPago, setEstadoPago] = useState(null);
+  const [mostrarAlertaPago, setMostrarAlertaPago] = useState(false);
 
   const API_URL = '/api';
 
@@ -22,7 +24,7 @@ const VisorResultados = () => {
       const response = await axios.get(`${API_URL}/resultados/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setResultados(response.data.resultados || []);
+      setResultados(response.data.resultados || response.data.data || []);
       setLoading(false);
     } catch (error) {
       setError('Error al cargar resultados');
@@ -36,9 +38,51 @@ const VisorResultados = () => {
       const response = await axios.get(`${API_URL}/resultados/${resultadoId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      setDetalleResultado(response.data);
+      setDetalleResultado(response.data.data || response.data);
+      
+      // Verificar estado de pago automáticamente
+      await verificarEstadoPago(resultadoId);
     } catch (error) {
       alert('Error al cargar detalles');
+    }
+  };
+
+  const verificarEstadoPago = async (resultadoId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/resultados/${resultadoId}/verificar-pago`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      setEstadoPago(response.data);
+    } catch (error) {
+      console.error('Error al verificar pago:', error);
+      // Si hay error en la verificación, permitir imprimir (fail-safe)
+      setEstadoPago({ puede_imprimir: true, monto_pendiente: 0 });
+    }
+  };
+
+  const handleImprimir = async () => {
+    if (!estadoPago) {
+      alert('Verificando estado de pago...');
+      return;
+    }
+
+    if (!estadoPago.puede_imprimir && estadoPago.monto_pendiente > 0) {
+      setMostrarAlertaPago(true);
+      return;
+    }
+
+    // Si puede imprimir, proceder con la impresión
+    window.print();
+
+    // Marcar como impreso en el backend
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_URL}/resultados/${detalleResultado._id || detalleResultado.id}/imprimir`, {}, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    } catch (error) {
+      console.error('Error al marcar como impreso:', error);
     }
   };
 
@@ -255,6 +299,72 @@ const VisorResultados = () => {
                   <small>{detalleResultado.valores_referencia}</small>
                 </div>
               )}
+
+              {/* Botón de imprimir */}
+              <div style={styles.printSection}>
+                <button
+                  onClick={handleImprimir}
+                  disabled={!estadoPago}
+                  style={{
+                    ...styles.btnPrint,
+                    opacity: !estadoPago ? 0.6 : 1,
+                    cursor: !estadoPago ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <FaPrint /> Imprimir Resultado
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de alerta de pago pendiente */}
+      {mostrarAlertaPago && estadoPago && (
+        <div style={styles.modal} onClick={() => setMostrarAlertaPago(false)}>
+          <div style={styles.alertaModal} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.alertaHeader}>
+              <FaExclamationTriangle style={{ fontSize: '40px', color: '#FF9800' }} />
+              <h3 style={{ margin: '10px 0', color: '#FF9800' }}>Pago Pendiente</h3>
+            </div>
+            <div style={styles.alertaBody}>
+              <p style={{ fontSize: '16px', marginBottom: '15px', textAlign: 'center' }}>
+                ⚠️ Este paciente tiene un pago pendiente de{' '}
+                <strong style={{ color: '#e74c3c', fontSize: '20px' }}>
+                  RD$ {estadoPago.monto_pendiente.toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </strong>
+              </p>
+              <p style={{ fontSize: '14px', color: '#666', textAlign: 'center' }}>
+                El resultado no está disponible para impresión hasta que se complete el pago.
+              </p>
+              
+              {estadoPago.facturas_pendientes && estadoPago.facturas_pendientes.length > 0 && (
+                <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+                  <h4 style={{ marginBottom: '10px', fontSize: '14px' }}>Facturas Pendientes:</h4>
+                  {estadoPago.facturas_pendientes.map(factura => (
+                    <div key={factura.id} style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      padding: '8px 0',
+                      borderBottom: '1px solid #e0e0e0',
+                      fontSize: '13px'
+                    }}>
+                      <span>{factura.numero}</span>
+                      <span style={{ fontWeight: 'bold', color: '#e74c3c' }}>
+                        RD$ {factura.pendiente.toLocaleString('es-DO', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={styles.alertaFooter}>
+              <button
+                onClick={() => setMostrarAlertaPago(false)}
+                style={styles.btnCerrarAlerta}
+              >
+                Entendido
+              </button>
             </div>
           </div>
         </div>
@@ -530,6 +640,60 @@ const styles = {
     fontSize: '12px',
     color: '#666',
     fontStyle: 'italic'
+  },
+  printSection: {
+    marginTop: '25px',
+    padding: '20px',
+    borderTop: '2px solid #e0e0e0',
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  btnPrint: {
+    padding: '15px 40px',
+    backgroundColor: '#2196F3',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    transition: 'background-color 0.3s'
+  },
+  alertaModal: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    maxWidth: '500px',
+    width: '90%',
+    padding: '30px',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+    textAlign: 'center'
+  },
+  alertaHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: '20px'
+  },
+  alertaBody: {
+    marginBottom: '25px'
+  },
+  alertaFooter: {
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  btnCerrarAlerta: {
+    padding: '12px 30px',
+    backgroundColor: '#2196F3',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s'
   }
 };
 
