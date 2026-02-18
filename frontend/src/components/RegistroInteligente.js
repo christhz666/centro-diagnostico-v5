@@ -183,7 +183,7 @@ const RegistroInteligente = () => {
           subtotal: (e.precio || 0) - (e.cobertura || 0)
         })),
         subtotal: calcularSubtotal(),
-        descuento: calcularCobertura() + descuento,
+        descuento: descuento,
         total: calcularTotal(),
         montoPagado: montoPagado,
         metodoPago: metodoPago,
