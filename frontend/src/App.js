@@ -25,7 +25,20 @@ function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
@@ -94,14 +107,22 @@ function App() {
   return (
     <Router>
       <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <aside style={{
+        {/* Mobile overlay */}
+        {sidebarOpen && isMobile && (
+          <div
+            className="sidebar-overlay"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+        <aside className={`app-sidebar${sidebarOpen ? ' open' : ''}`} style={{
           width: sidebarOpen ? '250px' : '70px',
           background: 'linear-gradient(180deg, #1b262c 0%, #0f4c75 100%)',
-          transition: 'width 0.3s',
+          transition: 'width 0.3s, transform 0.3s',
           position: 'fixed',
           height: '100vh',
           zIndex: 1000,
-          boxShadow: '2px 0 10px rgba(0,0,0,0.2)'
+          boxShadow: '2px 0 10px rgba(0,0,0,0.2)',
+          overflowY: 'auto'
         }}>
           <div style={{
             padding: '20px',
@@ -119,6 +140,7 @@ function App() {
               <Link
                 key={index}
                 to={item.path}
+                onClick={() => { if (isMobile) setSidebarOpen(false); }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -138,7 +160,7 @@ function App() {
                 }}
               >
                 <span style={{ fontSize: 18 }}>{item.icon}</span>
-                {sidebarOpen && <span>{item.label}</span>}
+                {sidebarOpen && <span className="sidebar-label">{item.label}</span>}
               </Link>
             ))}
           </nav>
@@ -166,14 +188,14 @@ function App() {
           </div>
         </aside>
 
-        <main style={{
+        <main className="app-main" style={{
           flex: 1,
           marginLeft: sidebarOpen ? '250px' : '70px',
           transition: 'margin-left 0.3s',
           background: '#f5f6fa',
           minHeight: '100vh'
         }}>
-          <header style={{
+          <header className="app-header" style={{
             background: 'white',
             padding: '15px 25px',
             boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
@@ -206,7 +228,7 @@ function App() {
             </div>
           </header>
 
-          <div style={{ padding: '25px' }}>
+          <div className="content-area" style={{ padding: '25px' }}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/registro" element={<RegistroInteligente />} />
