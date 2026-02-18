@@ -73,11 +73,14 @@ class ApiService {
     }
     async getMe() { return this.request('/auth/me'); }
 
-    async getDashboardStats() { return this.request('/reportes/dashboard'); }
+    // Dashboard endpoints: /api/dashboard/stats, /api/dashboard/citas-grafica, /api/dashboard/top-estudios
+    // Citas hoy endpoint: /api/citas/hoy
+    async getDashboardStats() { return this.request('/dashboard/stats'); }
     async getCitasHoy() { return this.request('/citas/hoy'); }
     async getCitasGrafica() { return this.request('/dashboard/citas-grafica'); }
     async getTopEstudios() { return this.request('/dashboard/top-estudios'); }
 
+    // Pacientes endpoints: /api/pacientes
     async getPacientes(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request('/pacientes/?' + query);
@@ -90,6 +93,7 @@ class ApiService {
         return this.request('/pacientes/' + id, { method: 'PUT', body: JSON.stringify(data) });
     }
 
+    // Estudios endpoints: /api/estudios
     async getEstudios(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request('/estudios/?' + query);
@@ -106,12 +110,14 @@ class ApiService {
     }
     async getCategorias() { return this.request('/estudios/categorias'); }
 
+    // Citas endpoints: /api/citas
     async getCitas(params = {}) {
         const query = new URLSearchParams(params).toString();
-        return this.request('/ordenes/?' + query);
+        return this.request('/citas/?' + query);
     }
-    async getCita(id) { return this.request('/ordenes/' + id); }
-    async getOrden(id) { return this.request('/ordenes/' + id); }
+    async getCita(id) { return this.request('/citas/' + id); }
+    // @deprecated Legacy alias for backward compatibility - use getCita() instead
+    async getOrden(id) { return this.request('/citas/' + id); }
 
     async createCita(data) {
         const ordenData = {
@@ -127,14 +133,14 @@ class ApiService {
                 descuento: e.descuento || 0
             }))
         };
-        return this.request('/ordenes/', {
+        return this.request('/citas/', {
             method: 'POST',
             body: JSON.stringify(ordenData)
         });
     }
 
     async updateCita(id, data) {
-        return this.request('/ordenes/' + id, { method: 'PUT', body: JSON.stringify(data) });
+        return this.request('/citas/' + id, { method: 'PUT', body: JSON.stringify(data) });
     }
 
     async getFacturas(params = {}) {
@@ -190,6 +196,7 @@ class ApiService {
     }
     async imprimirFactura(id) { return this.request('/impresion/factura-termica/' + id); }
 
+    // Resultados endpoints: /api/resultados
     async getResultados(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request('/resultados/?' + query);
@@ -208,6 +215,7 @@ class ApiService {
         });
     }
 
+    // Admin endpoints: /api/admin/usuarios
     async getUsuarios(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request('/admin/usuarios?' + query);

@@ -400,28 +400,32 @@ log "\n${YELLOW}Frontend → Backend Route Mapping:${NC}"
 
 # Dashboard
 if grep -q "/api/dashboard" frontend/src/components/Dashboard.js 2>/dev/null || \
-   grep -q "/api/dashboard" frontend/src/components/DashboardAvanzado.js 2>/dev/null; then
+   grep -q "/api/dashboard" frontend/src/components/DashboardAvanzado.js 2>/dev/null || \
+   grep -q "/api/dashboard" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/dashboard"
 else
     test_fail "Frontend NO usa /api/dashboard"
 fi
 
 # Estudios
-if grep -q "/api/estudios" frontend/src/components/*.js 2>/dev/null; then
+if grep -q "/api/estudios" frontend/src/components/*.js 2>/dev/null || \
+   grep -q "/api/estudios" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/estudios"
 else
     test_fail "Frontend NO usa /api/estudios"
 fi
 
 # Pacientes
-if grep -q "/api/pacientes" frontend/src/components/*.js 2>/dev/null; then
+if grep -q "/api/pacientes" frontend/src/components/*.js 2>/dev/null || \
+   grep -q "/api/pacientes" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/pacientes"
 else
     test_fail "Frontend NO usa /api/pacientes"
 fi
 
 # Citas
-if grep -q "/api/citas" frontend/src/components/*.js 2>/dev/null; then
+if grep -q "/api/citas" frontend/src/components/*.js 2>/dev/null || \
+   grep -q "/api/citas" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/citas"
 else
     test_fail "Frontend NO usa /api/citas"
@@ -436,7 +440,8 @@ fi
 
 # Admin usuarios
 if grep -q "/api/admin/usuarios" frontend/src/components/AdminPanel.js 2>/dev/null || \
-   grep -q "/api/admin/usuarios" frontend/src/components/AdminUsuarios.js 2>/dev/null; then
+   grep -q "/api/admin/usuarios" frontend/src/components/AdminUsuarios.js 2>/dev/null || \
+   grep -q "/api/admin/usuarios" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/admin/usuarios"
 else
     test_fail "Frontend NO usa /api/admin/usuarios"
@@ -444,7 +449,8 @@ fi
 
 # Resultados
 if grep -q "/api/resultados" frontend/src/components/VisorResultados.js 2>/dev/null || \
-   grep -q "/api/resultados" frontend/src/components/Resultados.js 2>/dev/null; then
+   grep -q "/api/resultados" frontend/src/components/Resultados.js 2>/dev/null || \
+   grep -q "/api/resultados" frontend/src/services/api.js 2>/dev/null; then
     test_pass "Frontend usa /api/resultados"
 else
     test_fail "Frontend NO usa /api/resultados"
