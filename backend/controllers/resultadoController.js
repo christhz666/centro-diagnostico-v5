@@ -16,10 +16,11 @@ exports.getResultados = async (req, res, next) => {
 
         let filter = {};
 
-        if (req.query.paciente) filter.paciente = req.query.paciente;
+        if (req.query.paciente || req.query.pacienteId) filter.paciente = req.query.paciente || req.query.pacienteId;
         if (req.query.cita) filter.cita = req.query.cita;
         if (req.query.estado) filter.estado = req.query.estado;
         if (req.query.estudio) filter.estudio = req.query.estudio;
+        if (req.query.codigoMuestra) filter.codigoMuestra = req.query.codigoMuestra;
 
         const [resultados, total] = await Promise.all([
             Resultado.find(filter)
@@ -106,6 +107,30 @@ exports.getResultadosPorCedula = async (req, res, next) => {
             count: resultados.length,
             data: resultados
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Obtener un resultado por código de muestra
+// @route   GET /api/resultados/muestra/:codigoMuestra
+exports.getResultadoPorCodigo = async (req, res, next) => {
+    try {
+        const resultado = await Resultado.findOne({ codigoMuestra: req.params.codigoMuestra })
+            .populate('paciente')
+            .populate('estudio')
+            .populate('medico', 'nombre apellido especialidad licenciaMedica')
+            .populate('realizadoPor', 'nombre apellido')
+            .populate('validadoPor', 'nombre apellido');
+
+        if (!resultado) {
+            return res.status(404).json({
+                success: false,
+                message: 'Resultado no encontrado con código: ' + req.params.codigoMuestra
+            });
+        }
+
+        res.json({ success: true, data: resultado });
     } catch (error) {
         next(error);
     }

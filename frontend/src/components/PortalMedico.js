@@ -35,6 +35,30 @@ const PortalMedico = () => {
       return;
     }
 
+    // Si la búsqueda parece un código de muestra (MUE-YYYYMMDD-NNNNN)
+    if (busqueda.startsWith('MUE-') && busqueda.length >= 13) {
+      try {
+        setLoading(true);
+        const response = await api.getResultadoPorCodigoMuestra(busqueda);
+        const resultado = response.data || response;
+        if (resultado && resultado.paciente) {
+          // Buscar el paciente completo
+          const pacienteId = resultado.paciente._id || resultado.paciente.id || resultado.paciente;
+          const pacResponse = await api.getPaciente(pacienteId);
+          const pac = pacResponse.data || pacResponse;
+          setPacientes([pac]);
+          // Auto-cargar el historial
+          await cargarHistorial(pac);
+        }
+      } catch (err) {
+        console.error('Error buscando por código:', err);
+        setPacientes([]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await api.getPacientes({ search: busqueda });
@@ -76,24 +100,9 @@ const PortalMedico = () => {
       setLoadingHistorial(true);
       const pacienteId = paciente._id || paciente.id;
       
-      // Intentar cargar resultados
-      let datos = [];
-      try {
-        const response = await api.getResultados({ pacienteId: pacienteId });
-        datos = response.data || response || [];
-      } catch (e1) {
-        try {
-          const response = await api.getResultados({ paciente: pacienteId });
-          datos = response.data || response || [];
-        } catch (e2) {
-          // Cargar todos y filtrar
-          const response = await api.getResultados({});
-          const todos = response.data || response || [];
-          datos = todos.filter(r => 
-            (r.paciente?._id || r.paciente?.id || r.paciente || r.pacienteId) === pacienteId
-          );
-        }
-      }
+      // Usar el endpoint dedicado para cargar resultados por paciente
+      const response = await api.getResultadosPorPaciente(pacienteId);
+      const datos = response.data || response || [];
       
       setHistorial(Array.isArray(datos) ? datos : []);
     } catch (err) {

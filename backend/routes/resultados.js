@@ -8,6 +8,7 @@ router.get('/cedula/:cedula', resultadoController.getResultadosPorCedula);
 // Rutas sin protección temporalmente para testing
 router.get('/', resultadoController.getResultados);
 router.get('/paciente/:pacienteId', resultadoController.getResultadosPorPaciente);
+router.get('/muestra/:codigoMuestra', resultadoController.getResultadoPorCodigo);
 // Verificar pago antes de imprimir - DEBE IR ANTES de '/:id'
 router.get('/:id/verificar-pago', resultadoController.verificarPago);
 router.get('/:id', resultadoController.getResultado);

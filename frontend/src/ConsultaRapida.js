@@ -18,7 +18,7 @@ const ConsultaRapida = () => {
 
   // Buscar cuando el código tenga el formato correcto
   useEffect(() => {
-    if (codigo.length >= 8 && codigo.startsWith('PAC')) {
+    if (codigo.length >= 8 && (codigo.startsWith('PAC') || codigo.startsWith('MUE-'))) {
       buscarPaciente();
     }
   }, [codigo]);
@@ -31,6 +31,26 @@ const ConsultaRapida = () => {
       setError('');
       setPaciente(null);
       setResultados([]);
+
+      // Si es un código de muestra (MUE-YYYYMMDD-NNNNN), buscar el resultado
+      if (codigo.startsWith('MUE-') && codigo.length >= 13) {
+        try {
+          const response = await api.getResultadoPorCodigoMuestra(codigo);
+          const resultado = response.data || response;
+          if (resultado && resultado.paciente) {
+            const pacienteId = resultado.paciente._id || resultado.paciente.id || resultado.paciente;
+            const pacResponse = await api.getPaciente(pacienteId);
+            const pac = pacResponse.data || pacResponse;
+            setPaciente(pac);
+            setResultados([resultado]);
+            setResultadoSeleccionado(resultado);
+            return;
+          }
+        } catch (err) {
+          setError('No se encontró ningún resultado con código: ' + codigo);
+          return;
+        }
+      }
 
       // Extraer el ID del código (PAC + últimos 8 caracteres del ID)
       const idParcial = codigo.replace('PAC', '').toLowerCase();
