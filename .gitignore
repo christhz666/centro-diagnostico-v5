@@ -1,0 +1,10 @@
+node_modules/
+*/node_modules/
+.env
+*/.env
+build/
+*/build/
+*.log
+logs/
+nohup.out
+.DS_Store

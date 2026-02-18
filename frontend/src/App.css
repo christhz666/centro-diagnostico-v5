@@ -1,0 +1,213 @@
+/* Reset y estilos globales */
+* {
+  box-sizing: border-box;
+}
+
+/* Quitar el cursor de texto en elementos no editables */
+body, div, span, p, h1, h2, h3, h4, h5, h6, 
+button, a, label, table, tr, td, th, 
+nav, aside, header, footer, main, section {
+  cursor: default;
+}
+
+/* Solo mostrar cursor de texto en inputs y textareas */
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+}
+
+/* Cursor pointer para elementos clickeables */
+button, a, [role="button"], .clickable {
+  cursor: pointer;
+}
+
+/* Cursor para selects */
+select {
+  cursor: pointer;
+}
+
+/* Animación de spin para loading */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Animación pulse */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Estilos para scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Quitar outline azul en focus pero mantener accesibilidad */
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Deshabilitar selección de texto en elementos de UI */
+button, nav, aside, .no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Permitir selección en contenido */
+p, span, td, th, input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ==========================================
+   RESPONSIVE - Mobile & Tablet
+   ========================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .app-sidebar {
+    width: 70px !important;
+  }
+  .app-sidebar .sidebar-label {
+    display: none;
+  }
+  .app-main {
+    margin-left: 70px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+    width: 250px !important;
+    transition: transform 0.3s ease;
+  }
+  .app-sidebar.open {
+    transform: translateX(0);
+  }
+  /* En mobile, cuando el sidebar está abierto, mostrar los labels */
+  .app-sidebar.open .sidebar-label {
+    display: inline !important;
+  }
+  .app-main {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .app-main .content-area {
+    padding: 10px !important;
+  }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+  .sidebar-overlay.hidden {
+    display: none;
+  }
+
+  /* Stack grids on mobile */
+  .registro-grid,
+  .step-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Responsive tables */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Header adjustments */
+  .app-header {
+    padding: 10px 15px !important;
+  }
+
+  /* Form grid adjustments */
+  .form-grid-2col {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modal adjustments */
+  .modal-content {
+    width: 95% !important;
+    max-width: none !important;
+    margin: 10px !important;
+    padding: 15px !important;
+  }
+
+  /* Card adjustments */
+  .stat-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Steps indicators */
+  .steps-bar {
+    flex-direction: row;
+    gap: 5px;
+  }
+  .steps-bar > div {
+    font-size: 12px;
+  }
+
+  /* Buttons */
+  .action-buttons {
+    flex-direction: column;
+  }
+  .action-buttons button {
+    width: 100%;
+  }
+
+  /* Print button area */
+  .no-print {
+    flex-direction: column;
+  }
+
+  /* Factura thermal print */
+  .factura-termica {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px !important;
+  }
+  h2 {
+    font-size: 18px !important;
+  }
+  h3 {
+    font-size: 16px !important;
+  }
+  .app-header span {
+    font-size: 12px;
+  }
+}
