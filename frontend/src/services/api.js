@@ -274,6 +274,23 @@ class ApiService {
     async getEmpresaInfo() {
         return this.request('/configuracion/empresa');
     }
+
+    // Deploy de Agentes
+    async escanearRed() {
+        return this.request('/deploy/scan');
+    }
+    async getAgentesInstalados() {
+        return this.request('/deploy/agents');
+    }
+    async deployAgente(ip, hostname) {
+        return this.request('/deploy/install', {
+            method: 'POST',
+            body: JSON.stringify({ ip, hostname })
+        });
+    }
+    async verificarAgenteEstado(ip) {
+        return this.request('/deploy/status/' + ip);
+    }
 }
 
 const api = new ApiService();

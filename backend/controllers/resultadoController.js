@@ -116,7 +116,25 @@ exports.getResultadosPorCedula = async (req, res, next) => {
 // @route   GET /api/resultados/muestra/:codigoMuestra
 exports.getResultadoPorCodigo = async (req, res, next) => {
     try {
-        const resultado = await Resultado.findOne({ codigoMuestra: req.params.codigoMuestra })
+        let codigoMuestra = req.params.codigoMuestra;
+        
+        // Si el código es solo números, intentar buscar con L primero (para laboratorio)
+        if (/^\d+$/.test(codigoMuestra)) {
+            const codigoConL = `L${codigoMuestra}`;
+            const resultadoLab = await Resultado.findOne({ codigoMuestra: codigoConL })
+                .populate('paciente')
+                .populate('estudio')
+                .populate('medico', 'nombre apellido especialidad licenciaMedica')
+                .populate('realizadoPor', 'nombre apellido')
+                .populate('validadoPor', 'nombre apellido');
+            
+            if (resultadoLab) {
+                return res.json({ success: true, data: resultadoLab });
+            }
+        }
+        
+        // Buscar con el código tal cual
+        const resultado = await Resultado.findOne({ codigoMuestra: codigoMuestra })
             .populate('paciente')
             .populate('estudio')
             .populate('medico', 'nombre apellido especialidad licenciaMedica')

@@ -5,6 +5,11 @@ Centro Diagnóstico v5
 
 Este agente se ejecuta en PCs de laboratorio y recolecta datos de equipos médicos
 para enviarlos automáticamente al servidor central.
+
+Características:
+- Auto-detección de puertos COM y equipos médicos
+- No requiere configuración manual de puertos
+- Caché de puertos detectados para evitar re-escaneo
 """
 
 import json
@@ -23,6 +28,9 @@ from collectors.dicom_listener import DicomListener
 
 # Importar uploader
 from uploader import ResultUploader
+
+# Importar detector de puertos
+from port_detector import PortDetector
 
 
 class DesktopAgent:
@@ -91,18 +99,66 @@ class DesktopAgent:
         """Inicializa los collectors habilitados según la configuración."""
         collectors_config = self.config.get('collectors', {})
         
-        # Serial Collector
+        # Serial Collector con auto-detección
         if collectors_config.get('serial', {}).get('enabled', False):
             self.logger.info("Inicializando Serial Collector...")
             try:
                 serial_config = collectors_config['serial']
-                collector = SerialCollector(
-                    ports_config=serial_config.get('ports', []),
-                    queue=self.queue,
-                    logger=self.logger
-                )
-                self.collectors.append(collector)
-                self.logger.info(f"Serial Collector inicializado con {len(serial_config.get('ports', []))} puertos")
+                
+                # Auto-detectar puertos si no hay configuración manual
+                ports_config = serial_config.get('ports', [])
+                
+                if not ports_config or serial_config.get('auto_detect', True):
+                    self.logger.info("Auto-detección de puertos COM habilitada...")
+                    detector = PortDetector(
+                        cache_file='ports_cache.json',
+                        logger=self.logger
+                    )
+                    
+                    # Intentar cargar cache primero
+                    cached_ports = detector.load_cache()
+                    
+                    if cached_ports:
+                        self.logger.info(f"Cache encontrado con {len(cached_ports)} puertos")
+                        # Verificar que los puertos cacheados siguen siendo válidos
+                        invalid = detector.verify_cached_ports()
+                        if invalid:
+                            self.logger.warning(f"Puertos inválidos removidos: {invalid}")
+                        
+                        # Si quedan puertos válidos, usarlos
+                        if detector.detected_ports:
+                            ports_config = detector.get_ports_config()
+                            self.logger.info(f"Usando {len(ports_config)} puertos del cache")
+                        else:
+                            # Cache vacío, escanear
+                            self.logger.info("Cache vacío, escaneando puertos...")
+                            detector.scan_all_ports()
+                            detector.save_cache()
+                            ports_config = detector.get_ports_config()
+                    else:
+                        # No hay cache, escanear
+                        self.logger.info("No se encontró cache, escaneando puertos...")
+                        detector.scan_all_ports()
+                        detector.save_cache()
+                        ports_config = detector.get_ports_config()
+                    
+                    if not ports_config:
+                        self.logger.warning("No se detectaron equipos en puertos COM")
+                        self.logger.info("El agente seguirá ejecutándose por si se conectan equipos más tarde")
+                
+                if ports_config:
+                    collector = SerialCollector(
+                        ports_config=ports_config,
+                        queue=self.queue,
+                        logger=self.logger
+                    )
+                    self.collectors.append(collector)
+                    self.logger.info(f"Serial Collector inicializado con {len(ports_config)} puertos")
+                    
+                    # Mostrar resumen de equipos detectados
+                    for pc in ports_config:
+                        self.logger.info(f"  - {pc['port']}: {pc['equipment_name']} ({pc['equipment_type']})")
+                        
             except Exception as e:
                 self.logger.error(f"Error inicializando Serial Collector: {e}")
         

@@ -5,26 +5,8 @@
   "collectors": {
     "serial": {
       "enabled": true,
-      "ports": [
-        {
-          "port": "COM3",
-          "baud_rate": 9600,
-          "data_bits": 8,
-          "stop_bits": 1,
-          "parity": "N",
-          "equipment_type": "hematologia",
-          "equipment_name": "Sysmex XN-1000"
-        },
-        {
-          "port": "COM4",
-          "baud_rate": 9600,
-          "data_bits": 8,
-          "stop_bits": 1,
-          "parity": "N",
-          "equipment_type": "quimica",
-          "equipment_name": "Roche Cobas c311"
-        }
-      ]
+      "auto_detect": true,
+      "ports": []
     },
     "file_watcher": {
       "enabled": true,
