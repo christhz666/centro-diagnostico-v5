@@ -6,7 +6,7 @@ import {
   FaHeartbeat, FaChartPie, FaPlusCircle, FaFileInvoiceDollar, 
   FaUserMd, FaCogs, FaSignOutAlt, FaBars, FaTimes, FaUsers, 
   FaFlask, FaClipboardList, FaBarcode, FaChevronDown, FaChevronRight,
-  FaBalanceScale, FaPalette
+  FaBalanceScale, FaPalette, FaNetworkWired, FaDownload
 } from 'react-icons/fa';
 
 import Login from './components/Login';
@@ -21,6 +21,8 @@ import Resultados from './components/Resultados';
 import ConsultaRapida from './components/ConsultaRapida';
 import AdminEquipos from './components/AdminEquipos';
 import Contabilidad from './components/Contabilidad';
+import DeployAgentes from './components/DeployAgentes';
+import DescargarApp from './components/DescargarApp';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -98,6 +100,9 @@ function App() {
     return <Login onLogin={handleLogin} />;
   }
 
+  // Detectar si estamos en Electron
+  const isElectron = window.isElectron === true;
+
   const menuItems = [
     { path: '/', icon: <FaChartPie />, label: 'Dashboard', roles: ['admin', 'medico', 'recepcion', 'laboratorio'] },
     { path: '/registro', icon: <FaPlusCircle />, label: 'Nuevo Registro', roles: ['admin', 'recepcion'] },
@@ -113,6 +118,10 @@ function App() {
     { path: '/admin/equipos', icon: <FaCogs />, label: 'Equipos', roles: ['admin'] },
     { path: '/admin/estudios', icon: <FaClipboardList />, label: 'Catálogo Estudios', roles: ['admin'] },
     { path: '/contabilidad', icon: <FaBalanceScale />, label: 'Contabilidad', roles: ['admin'] },
+    // Agregar condicionalmente Deploy Agentes o Descargar App
+    isElectron 
+      ? { path: '/deploy', icon: <FaNetworkWired />, label: 'Deploy Agentes', roles: ['admin'] }
+      : { path: '/descargar-app', icon: <FaDownload />, label: 'Descargar App', roles: ['admin', 'medico', 'recepcion', 'laboratorio'] }
   ];
 
   const filteredMenu = menuItems.filter(item => item.roles.includes(user.rol));
@@ -322,6 +331,8 @@ function App() {
               <Route path="/admin/estudios" element={<GestionEstudios />} />
               <Route path="/contabilidad" element={<Contabilidad />} />
               <Route path="/resultados" element={<Resultados />} />
+              <Route path="/deploy" element={<DeployAgentes />} />
+              <Route path="/descargar-app" element={<DescargarApp />} />
               <Route path="/login" element={<Navigate to="/" />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

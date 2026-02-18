@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaNetworkWired, FaDesktop, FaUpload, FaCheck, FaTimes, FaSpinner, FaSync, FaDownload } from 'react-icons/fa';
+import { FaNetworkWired, FaDesktop, FaUpload, FaCheck, FaTimes, FaSpinner, FaSync, FaDownload, FaExclamationTriangle } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 const DeployAgentes = () => {
@@ -8,6 +9,9 @@ const DeployAgentes = () => {
   const [loading, setLoading] = useState(false);
   const [deploying, setDeploying] = useState({});
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
+
+  // Detectar si estamos en Electron
+  const isElectron = window.isElectron === true;
 
   const colores = {
     primary: '#1a3a5c',
@@ -110,6 +114,48 @@ const DeployAgentes = () => {
 
   return (
     <div style={{ padding: '20px', backgroundColor: colores.light, minHeight: '100vh' }}>
+      {/* Mensaje si NO es Electron */}
+      {!isElectron && (
+        <div style={{
+          background: `linear-gradient(135deg, ${colores.warning} 0%, ${colores.danger} 100%)`,
+          padding: '30px',
+          borderRadius: '10px',
+          marginBottom: '30px',
+          color: 'white',
+          textAlign: 'center'
+        }}>
+          <FaExclamationTriangle style={{ fontSize: '60px', marginBottom: '20px' }} />
+          <h1 style={{ margin: '0 0 15px 0', fontSize: '28px' }}>
+            Funcionalidad No Disponible en Navegador
+          </h1>
+          <p style={{ margin: '0 0 20px 0', fontSize: '18px', opacity: 0.9 }}>
+            El módulo de <strong>Deploy de Agentes</strong> requiere acceso a la red local del laboratorio 
+            y solo está disponible en la <strong>Aplicación de Escritorio</strong>.
+          </p>
+          <Link 
+            to="/descargar-app"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '15px 30px',
+              backgroundColor: 'white',
+              color: colores.primary,
+              textDecoration: 'none',
+              borderRadius: '8px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.2)'
+            }}
+          >
+            <FaDownload /> Descargar Aplicación de Escritorio
+          </Link>
+        </div>
+      )}
+
+      {/* Contenido principal - solo mostrar si es Electron */}
+      {isElectron && (
+        <>
       {/* Header */}
       <div style={{
         background: `linear-gradient(135deg, ${colores.primary} 0%, ${colores.secondary} 100%)`,
@@ -362,6 +408,8 @@ const DeployAgentes = () => {
           <li>Los agentes instalados reportan su estado cada 60 segundos</li>
         </ul>
       </div>
+        </>
+      )}
     </div>
   );
 };
