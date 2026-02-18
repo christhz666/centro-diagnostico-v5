@@ -175,6 +175,155 @@ router.get('/:id', equipoController.getEquipo);
 // ?? RECEPCIÓN DESDE AGENTE REMOTO
 // -----------------------------------------------------------
 
+// Endpoint genérico para agentes remotos (sin requerir equipment ID)
+router.post('/recibir-json', async (req, res) => {
+  console.log('?? Recibiendo resultado desde agente remoto (genérico)');
+  console.log('Datos:', JSON.stringify(req.body, null, 2));
+
+  try {
+    const Resultado = require('../models/Resultado');
+    const Paciente = require('../models/Paciente');
+    const Estudio = require('../models/Estudio');
+    const Cita = require('../models/Cita');
+
+    const { 
+      station_name, 
+      equipment_type, 
+      equipment_name, 
+      cedula, 
+      paciente_id,
+      orden_id,
+      tipo_estudio,
+      valores, 
+      timestamp 
+    } = req.body;
+
+    // Buscar paciente por cédula o ID
+    let paciente;
+    if (cedula) {
+      paciente = await Paciente.findOne({ cedula });
+    } else if (paciente_id) {
+      paciente = await Paciente.findById(paciente_id).catch(() => null);
+      if (!paciente) {
+        paciente = await Paciente.findOne({ cedula: paciente_id });
+      }
+    }
+
+    if (!paciente) {
+      console.log('? Paciente no encontrado:', cedula || paciente_id);
+      return res.status(404).json({ 
+        success: false, 
+        message: `Paciente no encontrado` 
+      });
+    }
+
+    console.log('? Paciente encontrado:', paciente.nombre, paciente.apellido);
+
+    // Buscar estudio por tipo
+    let estudio = await Estudio.findOne({ 
+      $or: [
+        { codigo: { $regex: tipo_estudio, $options: 'i' } },
+        { nombre: { $regex: tipo_estudio, $options: 'i' } },
+        { categoria: { $regex: equipment_type, $options: 'i' } }
+      ]
+    });
+
+    if (!estudio) {
+      // Crear estudio genérico si no existe
+      estudio = await Estudio.create({
+        nombre: `${equipment_type} - ${equipment_name}`,
+        codigo: `AUTO-${equipment_type.toUpperCase()}`,
+        categoria: equipment_type,
+        precio: 0
+      });
+      console.log('? Estudio creado automáticamente');
+    }
+
+    // Buscar cita reciente del paciente
+    let cita = await Cita.findOne({ 
+      paciente: paciente._id,
+      estado: { $in: ['completada', 'en_proceso', 'programada'] }
+    }).sort({ createdAt: -1 });
+
+    if (!cita) {
+      const ahora = new Date();
+      cita = await Cita.create({
+        paciente: paciente._id,
+        fecha: ahora,
+        hora: ahora.toTimeString().slice(0, 5),
+        horaInicio: ahora.toTimeString().slice(0, 5),
+        estudios: [{
+          estudio: estudio._id,
+          precio: 0,
+          estado: 'completado'
+        }],
+        estado: 'completada',
+        motivo: `Auto - ${equipment_name}`
+      });
+      console.log('? Cita creada automáticamente');
+    }
+
+    // Convertir valores al formato interno
+    const valoresFormateados = [];
+    if (valores && typeof valores === 'object') {
+      for (const [key, value] of Object.entries(valores)) {
+        if (typeof value === 'object' && value !== null) {
+          valoresFormateados.push({
+            parametro: key,
+            valor: String(value.valor || ''),
+            unidad: value.unidad || '',
+            valorReferencia: value.referencia || '',
+            estado: value.estado || 'normal'
+          });
+        } else {
+          valoresFormateados.push({
+            parametro: key,
+            valor: String(value),
+            unidad: '',
+            valorReferencia: '',
+            estado: 'normal'
+          });
+        }
+      }
+    }
+
+    console.log('? Valores formateados:', valoresFormateados.length);
+
+    // Crear resultado (codigoMuestra se auto-genera en el pre-validate hook)
+    const resultado = await Resultado.create({
+      paciente: paciente._id,
+      cita: cita._id,
+      estudio: estudio._id,
+      valores: valoresFormateados,
+      estado: 'en_proceso',
+      observaciones: `Recibido desde ${equipment_name} (${station_name}) - ${timestamp || new Date().toISOString()}`
+    });
+
+    console.log('? Resultado creado:', resultado._id);
+    console.log('? Código de muestra:', resultado.codigoMuestra);
+
+    res.json({
+      success: true,
+      message: `Resultado recibido desde ${equipment_name}`,
+      data: {
+        resultadoId: resultado._id,
+        codigoMuestra: resultado.codigoMuestra,
+        paciente: `${paciente.nombre} ${paciente.apellido}`,
+        valores: valoresFormateados.length
+      },
+      // Devolver también en el nivel superior para compatibilidad
+      codigoMuestra: resultado.codigoMuestra
+    });
+
+  } catch (error) {
+    console.error('? Error procesando resultado:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+});
+
 router.post('/:id/recibir-resultado', async (req, res) => {
   console.log('?? Recibiendo resultado desde agente remoto');
   console.log('Equipo ID:', req.params.id);
@@ -292,9 +441,11 @@ router.post('/:id/recibir-resultado', async (req, res) => {
       message: `Resultado recibido desde ${equipo.nombre}`,
       data: {
         resultadoId: resultado._id,
+        codigoMuestra: resultado.codigoMuestra,
         paciente: `${paciente.nombre} ${paciente.apellido}`,
         valores: valoresMapeados.length
-      }
+      },
+      codigoMuestra: resultado.codigoMuestra
     });
 
   } catch (error) {

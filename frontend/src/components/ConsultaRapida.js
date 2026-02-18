@@ -12,6 +12,12 @@ const ConsultaRapida = () => {
   const [empresaConfig, setEmpresaConfig] = useState({});
   const inputRef = useRef(null);
 
+  // Constantes para códigos
+  const CODIGO_PACIENTE_PREFIX = 'PAC';
+  const CODIGO_PACIENTE_MIN_LENGTH = 11;
+  const CODIGO_MUESTRA_PREFIX = 'MUE-';
+  const CODIGO_MUESTRA_MIN_LENGTH = 13; // Formato: MUE-YYYYMMDD-NNNNN
+
   const colores = {
     azulCielo: '#87CEEB',
     azulOscuro: '#1a3a5c',
@@ -40,7 +46,10 @@ const ConsultaRapida = () => {
   }, []);
 
   useEffect(() => {
-    if (codigo.length >= 11 && codigo.startsWith('PAC')) {
+    const tieneFormatoPaciente = codigo.length >= CODIGO_PACIENTE_MIN_LENGTH && codigo.startsWith(CODIGO_PACIENTE_PREFIX);
+    const tieneFormatoMuestra = codigo.length >= CODIGO_MUESTRA_MIN_LENGTH && codigo.startsWith(CODIGO_MUESTRA_PREFIX);
+    
+    if (tieneFormatoPaciente || tieneFormatoMuestra) {
       buscarPaciente();
     }
   }, [codigo]);
@@ -53,7 +62,28 @@ const ConsultaRapida = () => {
       setPaciente(null);
       setResultados([]);
 
-      const idParcial = codigo.replace('PAC', '').toLowerCase();
+      // Si es un código de muestra (MUE-YYYYMMDD-NNNNN), buscar el resultado
+      if (codigo.startsWith(CODIGO_MUESTRA_PREFIX) && codigo.length >= CODIGO_MUESTRA_MIN_LENGTH) {
+        try {
+          const response = await api.getResultadoPorCodigoMuestra(codigo);
+          const resultado = response.data || response;
+          if (resultado && resultado.paciente) {
+            const pacienteId = resultado.paciente._id || resultado.paciente.id || resultado.paciente;
+            const pacResponse = await api.getPaciente(pacienteId);
+            const pac = pacResponse.data || pacResponse;
+            setPaciente(pac);
+            setResultados([resultado]);
+            setResultadoSeleccionado(resultado);
+            return;
+          }
+        } catch (err) {
+          setError('No se encontró resultado con código: ' + codigo);
+          setTimeout(() => { setCodigo(''); setError(''); }, 3000);
+          return;
+        }
+      }
+
+      const idParcial = codigo.replace(CODIGO_PACIENTE_PREFIX, '').toLowerCase();
       const response = await api.getPacientes({ search: '' });
       const pacientes = response.data || response || [];
       

@@ -201,6 +201,12 @@ class ApiService {
         const query = new URLSearchParams(params).toString();
         return this.request('/resultados/?' + query);
     }
+    async getResultadosPorPaciente(pacienteId) {
+        return this.request('/resultados/paciente/' + pacienteId);
+    }
+    async getResultadoPorCodigoMuestra(codigo) {
+        return this.request('/resultados/muestra/' + codigo);
+    }
     async getResultado(id) { return this.request('/resultados/' + id); }
     async createResultado(data) {
         return this.request('/resultados', { method: 'POST', body: JSON.stringify(data) });
