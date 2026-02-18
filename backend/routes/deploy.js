@@ -9,7 +9,8 @@ const execAsync = promisify(exec);
 const dnsReverse = promisify(dns.reverse);
 
 // Modelo simple para tracking de agentes (en memoria por ahora)
-// En producción debería estar en MongoDB
+// TODO: Mover a MongoDB para persistencia en producción
+// Esto evitará pérdida de datos en restart del servidor
 let agentesRegistrados = [];
 
 // @desc    Escanear red local para encontrar PCs
@@ -97,6 +98,13 @@ router.get('/scan', async (req, res) => {
 // Helper function para hacer ping a una IP
 async function pingIP(ip) {
     try {
+        // Validar formato de IP para prevenir command injection
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!ipRegex.test(ip)) {
+            console.warn(`IP inválida rechazada: ${ip}`);
+            return false;
+        }
+        
         const platform = os.platform();
         const command = platform === 'win32'
             ? `ping -n 1 -w 1000 ${ip}`
@@ -136,6 +144,15 @@ router.post('/install', async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: 'IP es requerida'
+            });
+        }
+        
+        // Validar formato de IP para prevenir command injection
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!ipRegex.test(ip)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Formato de IP inválido'
             });
         }
         
@@ -197,6 +214,15 @@ router.post('/install', async (req, res) => {
 router.get('/status/:ip', async (req, res) => {
     try {
         const { ip } = req.params;
+        
+        // Validar formato de IP
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!ipRegex.test(ip)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Formato de IP inválido'
+            });
+        }
         
         const agente = agentesRegistrados.find(a => a.ip === ip);
         
