@@ -169,7 +169,7 @@ function BuscadorPacientes() {
                     <tr><th>Orden</th><th>Fecha</th><th>Estado</th><th>Estudios</th></tr>
                   </thead>
                   <tbody>
-                    {historial.ordenes.slice(0, 10).map(o => (
+                    {historial.ordenes.slice(0, 5).map(o => (
                       <tr key={o.id}>
                         <td>{o.numero_orden}</td>
                         <td>{new Date(o.fecha_orden).toLocaleDateString('es-DO')}</td>
@@ -190,7 +190,7 @@ function BuscadorPacientes() {
                     <tr><th>Factura</th><th>Fecha</th><th>Total</th><th>Estado</th></tr>
                   </thead>
                   <tbody>
-                    {historial.facturas.slice(0, 10).map(f => (
+                    {historial.facturas.slice(0, 5).map(f => (
                       <tr key={f.id}>
                         <td>{f.numero_factura}</td>
                         <td>{new Date(f.fecha_factura).toLocaleDateString('es-DO')}</td>

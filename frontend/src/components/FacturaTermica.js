@@ -1,12 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Barcode from 'react-barcode';
-
-// Importar el logo local
-const logoLocal = '/logo-centro.png'; // Usar desde public folder para mejor compatibilidad
 
 const FacturaTermica = ({ factura, paciente, estudios, onClose }) => {
   const usuario = JSON.parse(localStorage.getItem('user') || '{}');
   const fecha = new Date();
+  const [empresaConfig, setEmpresaConfig] = useState({});
+
+  useEffect(() => {
+    // Load company config for invoice header
+    const token = localStorage.getItem('token');
+    fetch('/api/configuracion/', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setEmpresaConfig(data.configuracion || data || {}))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!factura || !paciente) {
@@ -110,20 +119,21 @@ const FacturaTermica = ({ factura, paciente, estudios, onClose }) => {
       <div className="factura-termica">
         <div style={{ textAlign: 'center', borderBottom: '3px solid ' + colores.azulOscuro, paddingBottom: '10px', marginBottom: '10px' }}>
           <img 
-            src={logoLocal}
-            alt="Mi Esperanza Lab" 
+            src={empresaConfig.logo_factura || '/logo-centro.png'}
+            alt={empresaConfig.empresa_nombre || 'Centro Diagnóstico'}
             style={{ maxWidth: '70mm', height: 'auto', marginBottom: '5px' }}
             onError={(e) => {
-              // Fallback a URL remota si la local falla
               e.target.onerror = null;
-              e.target.src = "https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png";
+              e.target.src = '/logo-centro.png';
             }}
           />
           <div style={{ fontSize: '10px', lineHeight: '1.4', color: colores.azulOscuro }}>
-            <p style={{ margin: '2px 0' }}>C/ Camino de Cancino #24</p>
-            <p style={{ margin: '2px 0' }}>Cancino Adentro, Santo Domingo Este, Rep. Dom.</p>
-            <p style={{ margin: '2px 0' }}>Tel: 849-288-9790 / 809-986-9970</p>
-            <p style={{ margin: '2px 0' }}>miesperanzalab@gmail.com</p>
+            {empresaConfig.empresa_nombre && (
+              <p style={{ margin: '2px 0', fontWeight: 'bold', fontSize: '12px' }}>{empresaConfig.empresa_nombre}</p>
+            )}
+            <p style={{ margin: '2px 0' }}>{empresaConfig.empresa_direccion || 'Sin dirección configurada'}</p>
+            <p style={{ margin: '2px 0' }}>Tel: {empresaConfig.empresa_telefono || ''}</p>
+            {empresaConfig.empresa_email && <p style={{ margin: '2px 0' }}>{empresaConfig.empresa_email}</p>}
           </div>
         </div>
 

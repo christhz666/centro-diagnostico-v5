@@ -10,8 +10,19 @@ const VisorResultados = () => {
   const [detalleResultado, setDetalleResultado] = useState(null);
   const [estadoPago, setEstadoPago] = useState(null);
   const [mostrarAlertaPago, setMostrarAlertaPago] = useState(false);
+  const [empresaConfig, setEmpresaConfig] = useState({});
 
   const API_URL = '/api';
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch(`${API_URL}/configuracion/`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => setEmpresaConfig(data.configuracion || data || {}))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetchResultados();
@@ -250,14 +261,23 @@ const VisorResultados = () => {
             <div style={styles.modalHeader}>
               <div style={styles.logoContainer}>
                 <img 
-                  src="/logo-centro.png" 
-                  alt="Mi Esperanza Lab"
+                  src={empresaConfig.logo_resultados || "/logo-centro.png"} 
+                  alt={empresaConfig.empresa_nombre || "Centro Diagnóstico"}
                   style={styles.logoImage}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png";
+                    e.target.src = "/logo-centro.png";
                   }}
                 />
+                {empresaConfig.empresa_nombre && (
+                  <p style={{ margin: '5px 0 0', fontWeight: 'bold', color: '#2c3e50' }}>{empresaConfig.empresa_nombre}</p>
+                )}
+                {empresaConfig.empresa_direccion && (
+                  <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#666' }}>{empresaConfig.empresa_direccion}</p>
+                )}
+                {empresaConfig.empresa_telefono && (
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#666' }}>Tel: {empresaConfig.empresa_telefono}</p>
+                )}
               </div>
               <h3><FaFlask /> Análisis de Laboratorio Clínico</h3>
               <button 

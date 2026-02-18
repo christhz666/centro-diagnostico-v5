@@ -29,7 +29,7 @@ const Resultados = () => {
       setLoading(true);
       const params = filtroEstado ? { estado: filtroEstado } : {};
       const response = await api.getResultados(params);
-      setResultados(response.data || []);
+      setResultados(Array.isArray(response) ? response : (response.data || []));
     } catch (err) {
       console.error(err);
       setResultados([]);
@@ -41,7 +41,7 @@ const Resultados = () => {
   const fetchCitasPendientes = async () => {
     try {
       const response = await api.getCitas({ estado: 'completada' });
-      setCitas(response.data || []);
+      setCitas(Array.isArray(response) ? response : (response.data || []));
     } catch (err) {
       console.error(err);
     }
