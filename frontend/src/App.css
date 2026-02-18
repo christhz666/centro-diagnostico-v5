@@ -106,6 +106,10 @@ p, span, td, th, input, textarea {
   .app-sidebar.open {
     transform: translateX(0);
   }
+  /* En mobile, cuando el sidebar está abierto, mostrar los labels */
+  .app-sidebar.open .sidebar-label {
+    display: inline !important;
+  }
   .app-main {
     margin-left: 0 !important;
     width: 100% !important;
