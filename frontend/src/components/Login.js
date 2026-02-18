@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FaHeartbeat, FaUser, FaLock } from 'react-icons/fa';
+import { FaUser, FaLock } from 'react-icons/fa';
 import api from '../services/api';
+import logoLocal from '../assets/logo-centro.svg';
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -56,7 +57,16 @@ const Login = ({ onLogin }) => {
                     justifyContent: 'center'
                 }}>
                     <div style={{textAlign: 'center', marginBottom: '30px'}}>
-                        <FaHeartbeat style={{fontSize: '80px', marginBottom: '20px'}}/>
+                        <img 
+                            src={logoLocal} 
+                            alt="Mi Esperanza Lab" 
+                            style={{
+                                maxWidth: '100%', 
+                                height: 'auto', 
+                                marginBottom: '20px',
+                                filter: 'brightness(1.2)'
+                            }}
+                        />
                         <h1 style={{fontSize: '32px', fontWeight: '700', marginBottom: '10px'}}>Mi Esperanza</h1>
                         <p style={{fontSize: '18px', opacity: 0.9}}>Centro Diagnóstico</p>
                     </div>

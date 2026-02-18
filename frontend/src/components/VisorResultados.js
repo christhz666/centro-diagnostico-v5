@@ -161,6 +161,22 @@ const VisorResultados = () => {
 
   return (
     <div style={styles.container}>
+      <style>
+        {`
+          @media print {
+            .no-print {
+              display: none !important;
+            }
+            .app-sidebar, .app-header {
+              display: none !important;
+            }
+            .modalContent {
+              box-shadow: none !important;
+              border: 1px solid #000;
+            }
+          }
+        `}
+      </style>
       <h2 style={styles.title}>
         <FaFlask /> Resultados de Análisis Médicos
       </h2>
@@ -232,10 +248,25 @@ const VisorResultados = () => {
         <div style={styles.modal} onClick={() => setDetalleResultado(null)}>
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
+              <div style={styles.logoContainer}>
+                <img 
+                  src="/logo-centro.svg" 
+                  alt="Mi Esperanza Lab"
+                  style={styles.logoImage}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png";
+                  }}
+                />
+              </div>
               <h3><FaFlask /> Análisis de Laboratorio Clínico</h3>
               <button 
-                onClick={() => setDetalleResultado(null)}
+                onClick={() => {
+                  setDetalleResultado(null);
+                  setEstadoPago(null);
+                }}
                 style={styles.closeButton}
+                className="no-print"
               >
                 <FaTimes />
               </button>
@@ -301,7 +332,7 @@ const VisorResultados = () => {
               )}
 
               {/* Botón de imprimir */}
-              <div style={styles.printSection}>
+              <div style={styles.printSection} className="no-print">
                 <button
                   onClick={handleImprimir}
                   disabled={!estadoPago}
@@ -542,14 +573,27 @@ const styles = {
     padding: '20px',
     borderBottom: '2px solid #e0e0e0',
     display: 'flex',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
     position: 'sticky',
     top: 0,
     zIndex: 10
   },
+  logoContainer: {
+    width: '100%',
+    textAlign: 'center',
+    marginBottom: '15px'
+  },
+  logoImage: {
+    maxWidth: '250px',
+    height: 'auto',
+    margin: '0 auto'
+  },
   closeButton: {
+    position: 'absolute',
+    top: '20px',
+    right: '20px',
     background: 'none',
     border: 'none',
     fontSize: '24px',

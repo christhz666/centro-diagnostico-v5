@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import Barcode from 'react-barcode';
 
+// Importar el logo local
+const logoLocal = '/logo-centro.svg'; // Usar desde public folder para mejor compatibilidad
+
 const FacturaTermica = ({ factura, paciente, estudios, onClose }) => {
   const usuario = JSON.parse(localStorage.getItem('user') || '{}');
   const fecha = new Date();
@@ -107,9 +110,14 @@ const FacturaTermica = ({ factura, paciente, estudios, onClose }) => {
       <div className="factura-termica">
         <div style={{ textAlign: 'center', borderBottom: '3px solid ' + colores.azulOscuro, paddingBottom: '10px', marginBottom: '10px' }}>
           <img 
-            src="https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png" 
+            src={logoLocal}
             alt="Mi Esperanza Lab" 
             style={{ maxWidth: '70mm', height: 'auto', marginBottom: '5px' }}
+            onError={(e) => {
+              // Fallback a URL remota si la local falla
+              e.target.onerror = null;
+              e.target.src = "https://miesperanzalab.com/wp-content/uploads/2024/10/Logo-Mie-esperanza-Lab-Color-400x190-1.png";
+            }}
           />
           <div style={{ fontSize: '10px', lineHeight: '1.4', color: colores.azulOscuro }}>
             <p style={{ margin: '2px 0' }}>C/ Camino de Cancino #24</p>
