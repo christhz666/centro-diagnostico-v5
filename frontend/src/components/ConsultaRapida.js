@@ -52,7 +52,7 @@ const ConsultaRapida = () => {
     const tieneFormatoPaciente = codigo.length >= CODIGO_PACIENTE_MIN_LENGTH && codigo.startsWith(CODIGO_PACIENTE_PREFIX);
     const tieneFormatoMuestra = codigo.length >= CODIGO_MUESTRA_MIN_LENGTH && codigo.startsWith(CODIGO_MUESTRA_PREFIX);
     // Nuevo formato simple: L1328 o solo número 1329
-    const esFormatoSimple = /^L?\d+$/.test(codigo) && codigo.length >= 1;
+    const esFormatoSimple = /^L?\d+$/.test(codigo) && codigo.length >= CODIGO_MUESTRA_SIMPLE_MIN_LENGTH;
     
     if (tieneFormatoPaciente || tieneFormatoMuestra || esFormatoSimple) {
       buscarPaciente();
@@ -68,7 +68,7 @@ const ConsultaRapida = () => {
       setResultados([]);
 
       // Nuevo formato simple: L1328 o 1329
-      const esFormatoSimple = /^L?\d+$/.test(codigo);
+      const esFormatoSimple = /^L?\d+$/.test(codigo) && codigo.length >= CODIGO_MUESTRA_SIMPLE_MIN_LENGTH;
       
       // Si es un código de muestra simple o antiguo, buscar el resultado
       if (esFormatoSimple || (codigo.startsWith(CODIGO_MUESTRA_PREFIX) && codigo.length >= CODIGO_MUESTRA_MIN_LENGTH)) {
