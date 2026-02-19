@@ -109,3 +109,9 @@ Todos los logs se guardan en el directorio `logs/` con timestamp único. Los arc
 - `diagnostico_completo.sh`: Diagnóstico del sistema en producción
 - `test_final.sh`: Test rápido de funcionalidad básica
 - `verificar_todo.sh`: Verificación general del sistema
+
+## 🖥️ Cliente nativo Qt6 (sin Electron)
+
+Se agregó una base de cliente de escritorio nativo offline-first en `qt6-centroapp/` para iniciar la migración de webview a app C++/Qt6.
+
+Ver guía en: `qt6-centroapp/README.md`.
