@@ -12,6 +12,14 @@ Sistema completo de gestión hospitalaria para centros de diagnóstico médico, 
 
 [El resto del README actual...]
 
+
+## 🖥️ Nueva base nativa de escritorio (Qt6, sin Electron)
+
+Se agregó el módulo `desktop-qt6/` como punto de partida para migrar la app de escritorio a una implementación nativa en C++/Qt6 con enfoque offline-first (SQLite local + cola de sincronización).
+
+- Ver guía: `desktop-qt6/README.md`
+- Compilación: `cmake -S desktop-qt6 -B desktop-qt6/build && cmake --build desktop-qt6/build`
+
 ## 🧪 Test Sistema Completo
 
 ### Descripción
